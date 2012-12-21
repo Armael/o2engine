@@ -6,6 +6,7 @@ module type Container = sig
   val add : Ball.t -> t -> t
   val iter : (Ball.t -> unit) -> t -> unit
   val map : (Ball.t -> Ball.t) -> t -> t
+  val fold : ('a -> Ball.t -> 'a) -> 'a -> t -> 'a
 end
 
 module Make = 
