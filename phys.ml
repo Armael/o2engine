@@ -23,8 +23,6 @@ struct
     new_id : int
   }
 
-  let ( >>= ) w f = f w
-
   let is_border_ok b = 
     let open Ball in
     let open Vector in
