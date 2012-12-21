@@ -89,28 +89,29 @@ struct
     let open Vector in
     { w with
       balls = 
-	(C.map (fun b -> let dx = b.speed.x *. dt in
-			 let dy = b.speed.y *. dt in
-			 let new_x = b.pos.x +. dx in
-			 let new_y = b.pos.y +. dy in
-			 let new_b = {b with pos = {x = new_x; y = new_y}} in
-			 let ((vx, vy), collided) = 
-			   List.fold_left 
-			     (fun ((vx, vy), collided) bord ->
-			       if not (is_border_ok new_b bord) then
-				 ((match bord with
-				 | Right f -> (-.vx, vy)
-				 | Left f -> (-.vx, vy)
-				 | Top f -> (vx, -.vy)
-				 | Bottom f -> (vx, -.vy)), true)
-			       else 
-				 ((vx, vy), collided)) 
-			     ((b.speed.x, b.speed.y), false)
-			     w.borders in
-			 {
-			   (if collided then b else new_b)
-			  with speed = {x = vx; y = vy}
-			 }
+	(C.map (fun b -> 
+	  let dx = b.speed.x *. dt in
+	  let dy = b.speed.y *. dt in
+	  let new_x = b.pos.x +. dx in
+	  let new_y = b.pos.y +. dy in
+	  let new_b = {b with pos = {x = new_x; y = new_y}} in
+	  let ((vx, vy), collided) = 
+	    List.fold_left 
+	      (fun ((vx, vy), collided) bord ->
+		if not (is_border_ok new_b bord) then
+		  ((match bord with
+		  | Right f -> (-.vx, vy)
+		  | Left f -> (-.vx, vy)
+		  | Top f -> (vx, -.vy)
+		  | Bottom f -> (vx, -.vy)), true)
+		else 
+		  ((vx, vy), collided)) 
+	      ((b.speed.x, b.speed.y), false)
+	      w.borders in
+	  {
+	    (if collided then b else new_b)
+	   with speed = {x = vx; y = vy}
+	  }
 	 ) w.balls)
     }
 end
