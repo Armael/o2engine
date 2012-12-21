@@ -61,6 +61,8 @@ struct
     new_id = 0
   }
 
+  let iter f w = C.iter f w.balls
+
   let add_ball b w =
     let open Ball in
     if is_in b w then
