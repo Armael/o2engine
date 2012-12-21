@@ -1,6 +1,7 @@
 open Utils
 
-module Engine = Phys.Make (ListContainer)
+module PhysEngine = Phys.Make (ListContainer)
+module Engine = Engine.Make (PhysEngine) (Screen)
 
 let rec add_balls xm ym n w =
   if n = 0 then w else (
@@ -22,20 +23,20 @@ let rec add_balls xm ym n w =
   )
 
 let () =
-  Graphics.open_graph " ";
-  Graphics.auto_synchronize false;
-  Random.self_init ();
-  let xm = float (Graphics.size_x ()) in
-  let ym = float (Graphics.size_y ()) in
-
+  let open Screen in
   let open Engine in
-  new_world () >>=
-    add_border (Left 0.) >>=
-    add_border (Right xm) >>=
-    add_border (Bottom 0.) >>=
-    add_border (Top ym) >>=
+  let world = Engine.new_world () in
+  Random.self_init ();
+  let xm = float (snd world).width in
+  let ym = float (snd world).height in
+
+  world >>=
+    add_border (PhysEngine.Left 0.) >>=
+    add_border (PhysEngine.Right xm) >>=
+    add_border (PhysEngine.Bottom 0.) >>=
+    add_border (PhysEngine.Top ym) >>=
     add_balls xm ym 20 >>=
-    loop (1./.60.)
+    run 60
     
     
     

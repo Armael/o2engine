@@ -112,24 +112,4 @@ struct
 			 }
 	 ) w.balls)
     }
-      
-  let display w = 
-    let open Ball in
-    let open Vector in
-    Graphics.clear_graph ();
-    C.iter (fun b -> Graphics.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius))
-      w.balls;
-    Graphics.synchronize ();
-    w
-
-  let wait_pass d w =
-    Utils.sleep d;
-    w 
-
-  let rec loop dt w =
-    w >>=
-      wait_pass dt >>=
-      simulate dt >>=
-      display >>=
-      loop dt;
 end
