@@ -48,12 +48,15 @@ module Make =
   functor (P : PhysEngine) ->
     functor (G : GraphicEngine) ->
 struct
-  type world = P.world * G.buffer
+  type world = {
+    phys : P.world;
+    buff : G.buffer;
+  }
   type border_type = P.border_type
-  let new_world () = (P.new_world (), G.open_buffer ())
-  let set_border border_type value w = (P.set_border border_type value (fst w), snd w)
-  let unset_border border_type w = (P.unset_border border_type (fst w), snd w)
-  let add_ball b w = (P.add_ball b (fst w), snd w)
+  let new_world () = {phys = P.new_world (); buff = G.open_buffer ()}
+  let set_border border_type value w = {w with phys = P.set_border border_type value w.phys}
+  let unset_border border_type w = {w with phys = P.unset_border border_type w.phys}
+  let add_ball b w = {w with phys = P.add_ball b w.phys}
 
   let display w =
     let open Ball in
@@ -61,8 +64,7 @@ struct
     G.draw (fun buf ->
       G.clear buf;
       P.iter (fun b ->
-	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf) (fst w))
-      (snd w);
+	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf) w.phys) w.buff;
     w
 
   let run fps world =
@@ -72,11 +74,15 @@ struct
       Utils.sleep d;
       w in
 
-    let simulate dt w = (P.simulate dt (fst w), snd w) in
+    let update_borders w = 
+      G.update w.buff; 
+      in
+    let simulate dt w = {w with phys = P.simulate dt w.phys} in
 
     let rec loop dt w =
       w >>=
 	wait_pass dt >>=
+(*	update_graphic_buffer_size >>= *)
 	simulate dt >>=
 	display >>=
 	loop dt in

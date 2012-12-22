@@ -27,8 +27,8 @@ let () =
   let open Engine in
   let world = Engine.new_world () in
   Random.self_init ();
-  let xm = float (snd world).width in
-  let ym = float (snd world).height in
+  let xm = float world.buff.width in
+  let ym = float world.buff.height in
 
   world >>=
     set_border PhysEngine.Left 0. >>=
