@@ -51,11 +51,17 @@ struct
   type world = {
     phys : P.world;
     buff : G.buffer;
+    borders_follow_buff_size : bool
   }
   type border_type = P.border_type
-  let new_world () = {phys = P.new_world (); buff = G.open_buffer ()}
+  let new_world () = {
+    phys = P.new_world ();
+    buff = G.open_buffer ();
+    borders_follow_buff_size = false
+  }
   let set_border border_type value w = {w with phys = P.set_border border_type value w.phys}
   let unset_border border_type w = {w with phys = P.unset_border border_type w.phys}
+  let borders_follow_buffer_size bool w = {w with borders_follow_buff_size = bool}
   let add_ball b w = {w with phys = P.add_ball b w.phys}
 
   let display w =
@@ -75,14 +81,22 @@ struct
       w in
 
     let update_borders w = 
+      let open G in
       G.update w.buff; 
+      if w.borders_follow_buff_size then
+	w >>= 
+	  set_border P.Right (float w.buff.width) >>=
+	  set_border P.Left 0. >>=
+	  set_border P.Top (float w.buff.height) >>=
+	  set_border P.Bottom 0.
+      else w
       in
     let simulate dt w = {w with phys = P.simulate dt w.phys} in
 
     let rec loop dt w =
       w >>=
 	wait_pass dt >>=
-(*	update_graphic_buffer_size >>= *)
+	update_borders >>= 
 	simulate dt >>=
 	display >>=
 	loop dt in

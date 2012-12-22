@@ -31,10 +31,7 @@ let () =
   let ym = float world.buff.height in
 
   world >>=
-    set_border PhysEngine.Left 0. >>=
-    set_border PhysEngine.Right xm >>=
-    set_border PhysEngine.Bottom 0. >>=
-    set_border PhysEngine.Top ym >>=
+    borders_follow_buffer_size true >>=
     add_balls xm ym 20 >>=
     run 60
     
