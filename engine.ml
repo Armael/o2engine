@@ -1,15 +1,13 @@
 open Utils
 
 module type PhysEngine = sig
-  type border =
-  | Right of float
-  | Left of float
-  | Top of float
-  | Bottom of float
+  type border_type =
+  Right | Left | Top | Bottom
   type world
   val new_world : unit -> world
   val iter : (Ball.t -> unit) -> world -> unit
-  val add_border : border -> world -> world
+  val set_border : border_type -> float -> world -> world
+  val unset_border : border_type -> world -> world
   val add_ball : Ball.t -> world -> world
   val simulate : float -> world -> world
 end
@@ -51,9 +49,10 @@ module Make =
     functor (G : GraphicEngine) ->
 struct
   type world = P.world * G.buffer
-  type border = P.border
+  type border_type = P.border_type
   let new_world () = (P.new_world (), G.open_buffer ())
-  let add_border out w = (P.add_border out (fst w), snd w)
+  let set_border border_type value w = (P.set_border border_type value (fst w), snd w)
+  let unset_border border_type w = (P.unset_border border_type (fst w), snd w)
   let add_ball b w = (P.add_ball b (fst w), snd w)
 
   let display w =

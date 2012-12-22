@@ -12,53 +12,45 @@ end
 module Make = 
   functor (C : Container) ->
 struct
-  type border = 
-  | Right of float
-  | Left of float
-  | Top of float
-  | Bottom of float
+  type borders = {
+    right : float option;
+    left : float option;
+    top : float option;
+    bottom : float option
+  }
+
+  type border_type = 
+  Right | Left | Top | Bottom
 
   type world = {
     balls : C.t;
-    borders : (border list);
+    borders : borders;
     new_id : int
   }
 
-  let is_border_ok b = 
+  let is_border_ok b b_type = 
     let open Ball in
     let open Vector in
     function
-    | Right f -> b.pos.x +. b.radius <= f
-    | Left f -> b.pos.x -. b.radius >= f
-    | Top f -> b.pos.y +. b.radius <= f
-    | Bottom f -> b.pos.y -. b.radius >= f
-
-  let inside w = 
-    List.fold_left
-      (fun (l, r, t, b) bord -> match bord with
-      | Right f -> (match r with
-	| Some x when f < x -> (l, Some f, t, b)
-	| _ -> (l, r, t, b))
-      | Left f -> (match l with
-	| Some x when f > x -> (Some f, r, t, b)
-	| _ -> (l, r, t, b))
-      | Top f -> (match t with
-	| Some x when f < x -> (l, r, Some f, b)
-	| _ -> (l, r, t, b))
-      | Bottom f -> (match b with
-	| Some x when f > x -> (l, r, t, Some f)
-	| _ -> (l, r, t, b)))
-      (None, None, None, None)
-      w.borders
+    | None -> true
+    | Some f -> (match b_type with
+      | Right -> b.pos.x +. b.radius <= f
+      | Left -> b.pos.x -. b.radius >= f
+      | Top -> b.pos.y +. b.radius <= f
+      | Bottom -> b.pos.y -. b.radius >= f)
 
   let is_in b w = 
-    List.fold_left
-      (fun a bord -> a && (is_border_ok b bord))
-      true w.borders
+    (is_border_ok b Right w.borders.right) &&
+      (is_border_ok b Left w.borders.left) &&
+      (is_border_ok b Top w.borders.top) &&
+      (is_border_ok b Bottom w.borders.bottom)
 
   let new_world () = {
     balls = C.empty ();
-    borders = [];
+    borders = {right = None;
+	       left = None;
+	       top = None;
+	       bottom = None};
     new_id = 0
   }
 
@@ -74,15 +66,25 @@ struct
     else 
       w
 
-  let add_border out w = 
-    {w with borders = out::(
-      (List.filter (function
-      | Right  _ -> (match out with Right  _ -> false | _ -> true)
-      | Left   _ -> (match out with Left   _ -> false | _ -> true)
-      | Bottom _ -> (match out with Bottom _ -> false | _ -> true)
-      | Top    _ -> (match out with Top    _ -> false | _ -> true))
-	 w.borders))
-    }
+  let set_border border_type value w = 
+    let b = (
+      match border_type with
+      | Right -> {w.borders with right = Some value}
+      | Left -> {w.borders with left = Some value}
+      | Top -> {w.borders with top = Some value}
+      | Bottom -> {w.borders with bottom = Some value}
+    ) in
+    {w with borders = b}
+
+  let unset_border border_type w = 
+    let b = (
+      match border_type with
+      | Right -> {w.borders with right = None}
+      | Left -> {w.borders with left = None}
+      | Top -> {w.borders with top = None}
+      | Bottom -> {w.borders with bottom = None}
+    ) in
+    {w with borders = b}
 
   let simulate dt w = 
     let open Ball in
@@ -96,18 +98,19 @@ struct
 	  let new_y = b.pos.y +. dy in
 	  let new_b = {b with pos = {x = new_x; y = new_y}} in
 	  let ((vx, vy), collided) = 
-	    List.fold_left 
-	      (fun ((vx, vy), collided) bord ->
-		if not (is_border_ok new_b bord) then
-		  ((match bord with
-		  | Right f -> (-.vx, vy)
-		  | Left f -> (-.vx, vy)
-		  | Top f -> (vx, -.vy)
-		  | Bottom f -> (vx, -.vy)), true)
-		else 
-		  ((vx, vy), collided)) 
-	      ((b.speed.x, b.speed.y), false)
-	      w.borders in
+	    ((b.speed.x, b.speed.y), false) >>=
+	      
+	      (fun ((vx, vy), collided) ->
+		if not (is_border_ok new_b Right w.borders.right) ||
+		  not (is_border_ok new_b Left w.borders.left) then
+		  ((-.vx, vy), true)
+		else ((vx, vy), false)) >>=
+
+	      (fun ((vx, vy), collided) ->
+		if not (is_border_ok new_b Top w.borders.top) ||
+		  not (is_border_ok new_b Bottom w.borders.bottom) then
+		  ((vx, -.vy), true)
+		else ((vx, vy), false)) in
 	  {
 	    (if collided then b else new_b)
 	   with speed = {x = vx; y = vy}

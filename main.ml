@@ -31,10 +31,10 @@ let () =
   let ym = float (snd world).height in
 
   world >>=
-    add_border (PhysEngine.Left 0.) >>=
-    add_border (PhysEngine.Right xm) >>=
-    add_border (PhysEngine.Bottom 0.) >>=
-    add_border (PhysEngine.Top ym) >>=
+    set_border PhysEngine.Left 0. >>=
+    set_border PhysEngine.Right xm >>=
+    set_border PhysEngine.Bottom 0. >>=
+    set_border PhysEngine.Top ym >>=
     add_balls xm ym 20 >>=
     run 60
     
