@@ -6,8 +6,8 @@ module Engine = Engine.Make (PhysEngine) (Screen)
 let rec add_balls xm ym n w =
   if n = 0 then w else (
     let r = (Random.float 35.) +. 5. in
-    let x = (Random.float xm -. (2.*.r)) +. r in
-    let y = (Random.float ym -. (2.*.r)) +. r in
+    let x = (Random.float (xm -. (2.*.r))) +. r in
+    let y = (Random.float (ym -. (2.*.r))) +. r in
     let vx = (if Random.bool () then 1. else -1.) *. (Random.float 500.) in
     let vy = (if Random.bool () then 1. else -1.) *. (Random.float 500.) in
     let open Ball in
