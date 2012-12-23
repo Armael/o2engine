@@ -4,3 +4,6 @@ val add : Ball.t -> t -> t
 val iter : (Ball.t -> unit) -> t -> unit
 val map : (Ball.t -> Ball.t) -> t -> t
 val fold : ('a -> Ball.t -> 'a) -> 'a -> t -> 'a
+
+val is_colliding : Ball.t -> t -> bool
+val collides_with : Ball.t -> t -> Ball.t list
