@@ -88,35 +88,82 @@ struct
     ) in
     {w with borders = b}
 
+  type collision_type =
+  | Border of border_type
+  | Ball of Ball.t
+
   let simulate dt w = 
+    let simulate_ball dt b = 
+      let open Ball in
+      let open Vector in
+      let dx = b.speed.x *. dt in
+      let dy = b.speed.y *. dt in
+      {b with pos = {
+	x = b.pos.x +. dx;
+	y = b.pos.y +. dy
+      }} in
+
+    let simulate_no_collisions dt w =
+      {w with
+	balls = (C.map (simulate_ball dt) w.balls)
+      } in
+
+    let collides_one b w =
+      let ( >>= ) o f = match o with
+	| None -> f ()
+	| Some a -> Some a in
+      None >>=
+	(fun _ -> if not (is_border_ok b Right w.borders.right) then
+	    Some (Border Right) else None) >>=
+	(fun _ -> if not (is_border_ok b Left w.borders.left) then
+	    Some (Border Left) else None) >>=
+	(fun _ -> if not (is_border_ok b Top w.borders.top) then
+	    Some (Border Top) else None) >>=
+	(fun _ -> if not (is_border_ok b Bottom w.borders.bottom) then
+	    Some (Border Bottom) else None) in
+
+
     let open Ball in
     let open Vector in
     { w with
       balls = 
 	(C.map (fun b -> 
-	  let dx = b.speed.x *. dt in
-	  let dy = b.speed.y *. dt in
-	  let new_x = b.pos.x +. dx in
-	  let new_y = b.pos.y +. dy in
-	  let new_b = {b with pos = {x = new_x; y = new_y}} in
-	  let ((vx, vy), collided) = 
-	    ((b.speed.x, b.speed.y), false) >>=
-	      
-	      (fun ((vx, vy), collided) ->
-		if not (is_border_ok new_b Right w.borders.right) ||
-		  not (is_border_ok new_b Left w.borders.left) then
-		  ((-.vx, vy), true)
-		else ((vx, vy), false)) >>=
+	  let dt_1px = 1. /. (Vector.norm b.speed) in
 
-	      (fun ((vx, vy), collided) ->
-		if not (is_border_ok new_b Top w.borders.top) ||
-		  not (is_border_ok new_b Bottom w.borders.bottom) then
-		  ((vx, -.vy), true)
-		else ((vx, vy), false)) in
-	  {
-	    (if collided then b else new_b)
-	   with speed = {x = vx; y = vy}
-	  }
+	  let rec dichotomia elapsed dt b w = 
+	    if dt < dt_1px then (
+	      (elapsed, b, w)
+	    ) else (
+	      let half_dt = dt /. 2. in
+	      let half_b = simulate_ball half_dt b
+	      and half_w = simulate_no_collisions half_dt w in
+	      if collides_one half_b half_w = None then
+		dichotomia (elapsed +. half_dt) half_dt half_b half_w
+	      else dichotomia elapsed half_dt b w
+	    ) in
+
+	  let rec simulate_this_ball dt b w =
+	    if dt <= 0. then b else (
+	      let new_b = simulate_ball dt b
+	      and new_w = simulate_no_collisions dt w in
+	      let collides = collides_one new_b new_w in
+	      match collides with
+	      | None -> new_b
+	      | Some obj ->
+		let (t, new_b, new_w) = dichotomia 0. dt b w in
+		let open Ball in
+		let open Vector in
+		(match obj with
+		| Border bord -> simulate_this_ball (dt -. t)
+		  (match bord with
+		  | Top | Bottom -> {new_b with speed = {new_b.speed with y = -. new_b.speed.y}}
+		  | Left | Right -> {new_b with speed = {new_b.speed with x = -. new_b.speed.x}}
+		  ) new_w 
+		| Ball _ -> new_b (* Collision entre balles pas encore gérée *)
+		)
+	    ) in
+	  
+	  simulate_this_ball dt b w
 	 ) w.balls)
     }
 end

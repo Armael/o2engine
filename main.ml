@@ -34,6 +34,3 @@ let () =
     borders_follow_buffer_size true >>=
     add_balls xm ym 20 >>=
     run 60
-    
-    
-    
