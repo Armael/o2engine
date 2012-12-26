@@ -12,14 +12,22 @@ let rec add_balls xm ym n w =
     let vy = (if Random.bool () then 1. else -1.) *. (Random.float 500.) in
     let open Ball in
     let open Vector in
-    add_balls xm ym (n-1) 
-      (Engine.add_ball {
-	id = 0;
-	pos = {x = x; y = y};
-	speed = {x = vx; y = vy};
-	radius = r;
-	mass = 5.
-      } w)
+    let rand_ball = {
+      id = 0;
+      pos = {x = x; y = y};
+      speed = {x = vx; y = vy};
+      radius = r;
+      mass = 5.
+    } in
+    
+    let open Engine in
+    let open PhysEngine in
+    if ListContainer.is_colliding rand_ball w.phys.balls then
+      add_balls xm ym n w
+    else (
+      add_balls xm ym (n-1) 
+	(Engine.add_ball rand_ball w)
+    )
   )
 
 let () =
