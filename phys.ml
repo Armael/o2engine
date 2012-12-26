@@ -92,22 +92,27 @@ struct
   | Border of border_type
   | Ball of Ball.t
 
-  let simulate dt w = 
-    let simulate_ball dt b = 
-      let open Ball in
-      let open Vector in
-      let dx = b.speed.x *. dt in
-      let dy = b.speed.y *. dt in
-      {b with pos = {
-	x = b.pos.x +. dx;
-	y = b.pos.y +. dy
-      }} in
+  (* Simule le mouvement d'une balle sans tenir compte des collisions
+     pendant dt *)
+  let simulate_ball_nc dt b =
+    let open Ball in
+    let open Vector in
+    let dx = b.speed.x *. dt in
+    let dy = b.speed.y *. dt in
+    {b with pos = {
+      x = b.pos.x +. dx;
+      y = b.pos.y +. dy
+    }}
 
-    let simulate_no_collisions dt w =
-      {w with
-	balls = (C.map (simulate_ball dt) w.balls)
-      } in
+  (* Simule l'évolution du monde sans tenir compte des collisions
+     pendant dt *)
+  let simulate_nc dt w =
+    {w with
+      balls = (C.map (simulate_ball_nc dt) w.balls)
+    }
 
+  (* Simule le mouvement d'une balle pendant dt *)
+  let rec simulate_ball dt b w =
     let collides_one b w =
       let ( >>= ) o f = match o with
 	| None -> f ()
@@ -122,48 +127,45 @@ struct
 	(fun _ -> if not (is_border_ok b Bottom w.borders.bottom) then
 	    Some (Border Bottom) else None) in
 
+    let rec dichotomia elapsed dt b w = 
+      let open Ball in
+      let open Vector in
+      let dt_1px = 1. /. (Vector.norm b.speed) in
+      if dt < dt_1px then (
+	(elapsed, b, w)
+      ) else (
+	let half_dt = dt /. 2. in
+	let half_b = simulate_ball_nc half_dt b
+	and half_w = simulate_nc half_dt w in
+	if collides_one half_b half_w = None then
+	  dichotomia (elapsed +. half_dt) half_dt half_b half_w
+	else dichotomia elapsed half_dt b w
+      ) in
 
-    let open Ball in
-    let open Vector in
-    { w with
-      balls = 
-	(C.map (fun b -> 
-	  let dt_1px = 1. /. (Vector.norm b.speed) in
-
-	  let rec dichotomia elapsed dt b w = 
-	    if dt < dt_1px then (
-	      (elapsed, b, w)
-	    ) else (
-	      let half_dt = dt /. 2. in
-	      let half_b = simulate_ball half_dt b
-	      and half_w = simulate_no_collisions half_dt w in
-	      if collides_one half_b half_w = None then
-		dichotomia (elapsed +. half_dt) half_dt half_b half_w
-	      else dichotomia elapsed half_dt b w
-	    ) in
-
-	  let rec simulate_this_ball dt b w =
-	    if dt <= 0. then b else (
-	      let new_b = simulate_ball dt b
-	      and new_w = simulate_no_collisions dt w in
-	      let collides = collides_one new_b new_w in
-	      match collides with
-	      | None -> new_b
-	      | Some obj ->
-		let (t, new_b, new_w) = dichotomia 0. dt b w in
+    if dt <= 0. then b else (
+      let new_b = simulate_ball_nc dt b
+      and new_w = simulate_nc dt w in
+      let collides = collides_one new_b new_w in
+      match collides with
+      | None -> new_b
+      | Some obj ->
+	let (t, new_b, new_w) = dichotomia 0. dt b w in
 		let open Ball in
 		let open Vector in
 		(match obj with
-		| Border bord -> simulate_this_ball (dt -. t)
+		| Border bord -> simulate_ball (dt -. t)
 		  (match bord with
 		  | Top | Bottom -> {new_b with speed = {new_b.speed with y = -. new_b.speed.y}}
 		  | Left | Right -> {new_b with speed = {new_b.speed with x = -. new_b.speed.x}}
 		  ) new_w 
 		| Ball _ -> new_b (* Collision entre balles pas encore gérée *)
 		)
-	    ) in
-	  
-	  simulate_this_ball dt b w
-	 ) w.balls)
+	    )
+
+  (* Simule l'évolution du monde pendant un temps dt *)
+  let simulate dt w = 
+    { w with
+      balls = 
+	(C.map (fun b -> simulate_ball dt b w) w.balls)
     }
 end
