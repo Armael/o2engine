@@ -18,6 +18,7 @@ let rot a v = { x = v.x *. (cos a) -. v.y *. (sin a); y = v.x *. (sin a) +. v.y 
 let norm v = sqrt (sp v v)
 
 let ( ++ ) = add
+let ( -- ) u v = u ++ (neg v)
 let ( ** ) = scale
 let ( |. ) = sp
 
