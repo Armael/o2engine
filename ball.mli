@@ -2,8 +2,9 @@ type t = {
   id : int;
   pos : Vector.t;
   speed : Vector.t;
-  radius : float ;
-  mass : float
+  radius : float;
+  mass : float;
+  color : Color.t
 }
 
 val create : unit -> t

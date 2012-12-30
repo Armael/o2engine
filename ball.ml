@@ -5,7 +5,8 @@ type t = {
   pos : V.t;
   speed : V.t;
   radius : float;
-  mass : float
+  mass : float;
+  color : Color.t
 }
 
 let create () = {
@@ -13,7 +14,8 @@ let create () = {
   pos = V.create ();
   speed = V.create ();
   radius = 0.;
-  mass = 0.
+  mass = 0.;
+  color = Color.black
 }
 
 let print b = Printf.printf "{id:%d; pos:" b.id;
