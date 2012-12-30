@@ -72,7 +72,8 @@ struct
     G.draw (fun buf ->
       G.clear buf;
       P.iter (fun b ->
-	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf) w.phys) w.buff;
+	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
+      ) w.phys) w.buff;
     w
 
   let run fps world =
