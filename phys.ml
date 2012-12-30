@@ -24,6 +24,7 @@ struct
 
   type world = {
     balls : C.t;
+    f : (Ball.t -> Vector.t) list;
     borders : borders;
     new_id : int
   }
@@ -47,6 +48,7 @@ struct
 
   let new_world () = {
     balls = C.empty ();
+    f = [];
     borders = {right = None;
 	       left = None;
 	       top = None;
@@ -65,6 +67,11 @@ struct
       }
     else 
       w
+
+  let add_f f w =
+    { w with
+      f = f::w.f
+    }
 
   let set_border border_type value w = 
     let b = (

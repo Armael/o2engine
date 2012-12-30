@@ -3,7 +3,7 @@ open Utils
 module PhysEngine = Phys.Make (ListContainer)
 module Engine = Engine.Make (PhysEngine) (Screen)
 
-let rec add_balls xm ym n w =
+let rec add_random_balls xm ym n w =
   if n = 0 then w else (
     let r = (Random.float 35.) +. 5. in
     let x = (Random.float (xm -. (2.*.r))) +. r in
@@ -23,9 +23,9 @@ let rec add_balls xm ym n w =
     let open Engine in
     let open PhysEngine in
     if ListContainer.is_colliding rand_ball w.phys.balls then
-      add_balls xm ym n w
+      add_random_balls xm ym n w
     else (
-      add_balls xm ym (n-1) 
+      add_random_balls xm ym (n-1) 
 	(Engine.add_ball rand_ball w)
     )
   )
@@ -40,5 +40,6 @@ let () =
 
   world >>=
     borders_follow_buffer_size true >>=
-    add_balls xm ym 20 >>=
+    add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
+    add_random_balls xm ym 70 >>= 
     run 60

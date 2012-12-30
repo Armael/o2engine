@@ -9,6 +9,7 @@ module type PhysEngine = sig
   val set_border : border_type -> float -> world -> world
   val unset_border : border_type -> world -> world
   val add_ball : Ball.t -> world -> world
+  val add_f : (Ball.t -> Vector.t) -> world -> world
   val simulate : float -> world -> world
 end
 
@@ -63,6 +64,7 @@ struct
   let unset_border border_type w = {w with phys = P.unset_border border_type w.phys}
   let borders_follow_buffer_size bool w = {w with borders_follow_buff_size = bool}
   let add_ball b w = {w with phys = P.add_ball b w.phys}
+  let add_f f w = {w with phys = P.add_f f w.phys}
 
   let display w =
     let open Ball in
