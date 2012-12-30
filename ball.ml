@@ -23,5 +23,7 @@ let print b = Printf.printf "{id:%d; pos:" b.id;
   Printf.printf "; radius: %f, mass: %f}" b.radius b.mass
 
 let is_colliding b1 b2 =
-  (V.norm (V.add (b1.pos) (V.neg b2.pos))) -. (b1.radius +. b2.radius) <= 0.
+  let delta = V.sub b1.pos b2.pos in
+  (V.sp delta delta) <= (b1.radius +. b2.radius) ** 2.
+
 
