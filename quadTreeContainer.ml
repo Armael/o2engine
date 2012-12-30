@@ -170,4 +170,11 @@ let map f depth (c : t) =
 		in
 			aux c (empty (fst3 c) (snd3 c))
 
+exception Collides
+let is_colliding b cont =
+  try iter
+       (fun other_ball -> if O.is_colliding b other_ball then raise Collides)
+       cont;
+      false with
+  | Collides -> true
 
