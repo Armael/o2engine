@@ -26,7 +26,6 @@ struct
     balls : C.t;
     f : (Ball.t -> Vector.t) list;
     borders : borders;
-    new_id : int;
     restitution : float
   }
 
@@ -54,7 +53,6 @@ struct
 	       left = None;
 	       top = None;
 	       bottom = None};
-    new_id = 0;
     restitution = 1.
   }
 
@@ -64,8 +62,7 @@ struct
     let open Ball in
     if is_in b w then
       { w with 
-	balls = C.add {b with id = w.new_id} w.balls;
-	new_id = w.new_id + 1
+	balls = C.add b w.balls
       }
     else 
       w
