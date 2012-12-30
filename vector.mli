@@ -2,6 +2,7 @@ type t = { x : float; y : float; }
 val create : unit -> t
 val add : t -> t -> t
 val neg : t -> t
+val sub : t -> t -> t
 val scale : float -> t -> t
 val sp : t -> t -> float
 val rot : float -> t -> t

@@ -6,8 +6,10 @@ let create () = { x = 0.; y = 0. }
 
 (* Addition de vecteurs *)
 let add v1 v2 = { x = v1.x +. v2.x; y = v1.y +. v2.y }
-(* "Soustraction" de vecteurs :calcule p2 + (-p1) *)
+(* Opposé d'un vecteur *)
 let neg v = { x = -. v.x ; y = -. v.y }
+(* "Soustraction" de vecteurs : calcule v1 + (-v2) *)
+let sub v1 v2 = add v1 (neg v2)
 (* Homothétie *)
 let scale k p = { x = k *. p.x; y = k *. p.y }
 (* Produit scalaire *)
