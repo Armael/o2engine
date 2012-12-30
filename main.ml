@@ -18,7 +18,7 @@ let rec add_random_balls xm ym n w =
       speed = {x = vx; y = vy};
       radius = r;
       mass = 0.001 *. r*.r;
-      color = Color.rgb (Random.int 200) (Random.int 200) (Random.int 200)
+      color = Color.rgb (Random.int 128) (Random.int 128) (Random.int 128)
     } in
     
     let open Engine in
