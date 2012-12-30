@@ -104,7 +104,7 @@ struct
     let delta = b1.pos -- b2.pos in
     let d = norm delta in
     let mtd = (((b1.radius +. b2.radius) -. d) /. d) ** delta in
-    let mtd_unit = ((1. /. (norm mtd)) ** mtd) in
+    let mtd_unit = unit mtd in
     
     let im1 = 1. /. b1.mass and im2 = 1. /. b2.mass in
     let b1 = {b1 with pos = b1.pos ++ ((im1 /. (im1 +. im2)) ** mtd)} in
