@@ -17,7 +17,7 @@ let rec add_random_balls xm ym n w =
       pos = {x = x; y = y};
       speed = {x = vx; y = vy};
       radius = r;
-      mass = 5.
+      mass = 0.001 *. r*.r
     } in
     
     let open Engine in
