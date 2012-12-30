@@ -4,7 +4,7 @@ type t = {
   id : int;
   pos : V.t;
   speed : V.t;
-  radius : float ;
+  radius : float;
   mass : float
 }
 
