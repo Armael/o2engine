@@ -109,7 +109,7 @@ struct
     let vn = v |. mtd_unit in
     
     if vn > 0. then (b1, b2) else
-      let i = (-2. *. vn) /. (im1 +. im2) in
+      let i = (-.(1. +. 0.9) *. vn) /. (im1 +. im2) in
       let impulse = i ** mtd_unit in
       let b1 = {b1 with speed = b1.speed ++ (im1 ** impulse)} in
       let b2 = {b2 with speed = b2.speed -- (im2 ** impulse)} in
