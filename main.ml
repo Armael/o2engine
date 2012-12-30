@@ -38,6 +38,10 @@ let () =
   let xm = float world.buff.width in
   let ym = float world.buff.height in
 
+
+  let open Ball in
+  let open Vector in
+
   world >>=
     borders_follow_buffer_size true >>=
     add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
