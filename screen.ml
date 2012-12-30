@@ -32,17 +32,6 @@ let update buf =
 let clear buf = Graphics.clear_graph ()
 let resize w h buf = Graphics.resize_window w h
 
-type color = Graphics.color
-let white = Graphics.white
-let black = Graphics.black
-let red = Graphics.red
-let green = Graphics.green
-let blue = Graphics.blue
-let yellow = Graphics.yellow
-let cyan = Graphics.cyan
-let magenta = Graphics.magenta
-
-let rgb = Graphics.rgb
 let set_color color buf = Graphics.set_color color
 let moveto x y buf = Graphics.moveto x y
 let rmoveto x y buf = Graphics.rmoveto x y

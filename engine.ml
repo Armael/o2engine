@@ -27,17 +27,7 @@ module type GraphicEngine = sig
 
   val clear : buffer -> unit
   val resize : int -> int -> buffer -> unit
-  type color
-  val white : color
-  val black : color
-  val red : color
-  val green : color
-  val blue : color
-  val yellow : color
-  val cyan : color
-  val magenta : color
-  val rgb : int -> int -> int -> color
-  val set_color : color -> buffer -> unit
+  val set_color : Color.t -> buffer -> unit
   val moveto : int -> int -> buffer -> unit
   val rmoveto : int -> int -> buffer -> unit
   val draw_rect : int -> int -> int -> int -> buffer -> unit
