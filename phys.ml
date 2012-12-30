@@ -26,7 +26,8 @@ struct
     balls : C.t;
     f : (Ball.t -> Vector.t) list;
     borders : borders;
-    new_id : int
+    new_id : int;
+    restitution : float
   }
 
   let is_border_ok b b_type = 
@@ -53,7 +54,8 @@ struct
 	       left = None;
 	       top = None;
 	       bottom = None};
-    new_id = 0
+    new_id = 0;
+    restitution = 1.
   }
 
   let iter f w = C.iter f w.balls
@@ -93,7 +95,10 @@ struct
     ) in
     {w with borders = b}
 
-  let b2b_collision_solver b1 b2 =
+  let set_restitution value w =
+    { w with restitution = value}
+
+  let b2b_collision_solver w b1 b2 =
     let open Ball in
     let open Vector in
     let delta = b1.pos -- b2.pos in
@@ -109,7 +114,7 @@ struct
     let vn = v |. mtd_unit in
     
     if vn > 0. then (b1, b2) else
-      let i = (-.(1. +. 0.9) *. vn) /. (im1 +. im2) in
+      let i = (-.(1. +. w.restitution) *. vn) /. (im1 +. im2) in
       let impulse = i ** mtd_unit in
       let b1 = {b1 with speed = b1.speed ++ (im1 ** impulse)} in
       let b2 = {b2 with speed = b2.speed -- (im2 ** impulse)} in
@@ -173,5 +178,5 @@ struct
 		  speed = {b.speed with y = -.b.speed.y}} else b)) w.balls} in
 
     {w with balls =
-	C.iterate_solve_collisions b2b_collision_solver (simulate_nc dt w).balls}
+	C.iterate_solve_collisions (b2b_collision_solver w) (simulate_nc dt w).balls}
 end

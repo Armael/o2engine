@@ -46,4 +46,5 @@ let () =
     borders_follow_buffer_size true >>=
     add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
     add_random_balls xm ym 70 >>= 
+    set_restitution 0.8 >>=
     run 60

@@ -8,6 +8,7 @@ module type PhysEngine = sig
   val iter : (Ball.t -> unit) -> world -> unit
   val set_border : border_type -> float -> world -> world
   val unset_border : border_type -> world -> world
+  val set_restitution : float -> world -> world
   val add_ball : Ball.t -> world -> world
   val add_f : (Ball.t -> Vector.t) -> world -> world
   val simulate : float -> world -> world
@@ -62,6 +63,7 @@ struct
   }
   let set_border border_type value w = {w with phys = P.set_border border_type value w.phys}
   let unset_border border_type w = {w with phys = P.unset_border border_type w.phys}
+  let set_restitution value w = {w with phys = P.set_restitution value w.phys}
   let borders_follow_buffer_size bool w = {w with borders_follow_buff_size = bool}
   let add_ball b w = {w with phys = P.add_ball b w.phys}
   let add_f f w = {w with phys = P.add_f f w.phys}
