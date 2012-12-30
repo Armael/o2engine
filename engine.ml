@@ -64,7 +64,9 @@ struct
     G.draw (fun buf ->
       G.clear buf;
       P.iter (fun b ->
+	G.set_color b.color buf;
 	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
+	G.set_color Color.black buf
       ) w.phys) w.buff;
     w
 
