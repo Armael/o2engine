@@ -6,9 +6,7 @@ module type Container = sig
   val add : Ball.t -> t -> t
   val iter : (Ball.t -> unit) -> t -> unit
   val map : (Ball.t -> Ball.t) -> t -> t
-  val fold : ('a -> Ball.t -> 'a) -> 'a -> t -> 'a
-  val is_colliding : Ball.t -> t -> bool
-  val collides_with : Ball.t -> t -> Ball.t list
+  val iterate_solve_collisions : (Ball.t -> Ball.t -> Ball.t * Ball.t) -> t -> t
 end
 
 module Make = 
@@ -88,15 +86,40 @@ struct
     ) in
     {w with borders = b}
 
-  type collision_type =
-  | Border of border_type
-  | Ball of Ball.t
+  let b2b_collision_solver b1 b2 =
+    let open Ball in
+    let open Vector in
+    let delta = b1.pos -- b2.pos in
+    let d = norm delta in
+    let mtd = (((b1.radius +. b2.radius) -. d) /. d) ** delta in
+    let mtd_unit = ((1. /. (norm mtd)) ** mtd) in
+    
+    let im1 = 1. /. b1.mass and im2 = 1. /. b2.mass in
+    let b1 = {b1 with pos = b1.pos ++ ((im1 /. (im1 +. im2)) ** mtd)} in
+    let b2 = {b2 with pos = b2.pos -- ((im2 /. (im1 +. im2)) ** mtd)} in
+    
+    let v = b1.speed -- b2.speed in
+    let vn = v |. mtd_unit in
+    
+    if vn > 0. then (b1, b2) else
+      let i = (-2. *. vn) /. (im1 +. im2) in
+      let impulse = i ** mtd_unit in
+      let b1 = {b1 with speed = b1.speed ++ (im1 ** impulse)} in
+      let b2 = {b2 with speed = b2.speed -- (im2 ** impulse)} in
+      (b1, b2)
 
   (* Simule le mouvement d'une balle sans tenir compte des collisions
      pendant dt *)
-  let simulate_ball_nc dt b =
+  let simulate_ball_nc dt w b =
     let open Ball in
     let open Vector in
+    let b = List.fold_left (fun acc f ->
+      let coef = dt /. acc.mass in
+      let f_acc = f acc in
+      {acc with speed = {
+	x = acc.speed.x +. (coef ** f_acc).x;
+	y = acc.speed.y +. (coef ** f_acc).y
+      }}) b w.f in
     let dx = b.speed.x *. dt in
     let dy = b.speed.y *. dt in
     {b with pos = {
@@ -108,64 +131,40 @@ struct
      pendant dt *)
   let simulate_nc dt w =
     {w with
-      balls = (C.map (simulate_ball_nc dt) w.balls)
+      balls = (C.map (simulate_ball_nc dt w) w.balls)
     }
-
-  (* Simule le mouvement d'une balle pendant dt *)
-  let rec simulate_ball dt b w =
-    let collides_one b w =
-      let ( >>= ) o f = match o with
-	| None -> f ()
-	| Some a -> Some a in
-      None >>=
-	(fun _ -> if not (is_border_ok b Right w.borders.right) then
-	    Some (Border Right) else None) >>=
-	(fun _ -> if not (is_border_ok b Left w.borders.left) then
-	    Some (Border Left) else None) >>=
-	(fun _ -> if not (is_border_ok b Top w.borders.top) then
-	    Some (Border Top) else None) >>=
-	(fun _ -> if not (is_border_ok b Bottom w.borders.bottom) then
-	    Some (Border Bottom) else None) in
-
-    let rec dichotomia elapsed dt b w = 
-      let open Ball in
-      let open Vector in
-      let dt_1px = 1. /. (Vector.norm b.speed) in
-      if dt < dt_1px then (
-	(elapsed, b, w)
-      ) else (
-	let half_dt = dt /. 2. in
-	let half_b = simulate_ball_nc half_dt b
-	and half_w = simulate_nc half_dt w in
-	if collides_one half_b half_w = None then
-	  dichotomia (elapsed +. half_dt) half_dt half_b half_w
-	else dichotomia elapsed half_dt b w
-      ) in
-
-    if dt <= 0. then b else (
-      let new_b = simulate_ball_nc dt b
-      and new_w = simulate_nc dt w in
-      let collides = collides_one new_b new_w in
-      match collides with
-      | None -> new_b
-      | Some obj ->
-	let (t, new_b, new_w) = dichotomia 0. dt b w in
-		let open Ball in
-		let open Vector in
-		(match obj with
-		| Border bord -> simulate_ball (dt -. t)
-		  (match bord with
-		  | Top | Bottom -> {new_b with speed = {new_b.speed with y = -. new_b.speed.y}}
-		  | Left | Right -> {new_b with speed = {new_b.speed with x = -. new_b.speed.x}}
-		  ) new_w 
-		| Ball _ -> new_b (* Collision entre balles pas encore gérée *)
-		)
-	    )
 
   (* Simule l'évolution du monde pendant un temps dt *)
   let simulate dt w = 
-    { w with
-      balls = 
-	(C.map (fun b -> simulate_ball dt b w) w.balls)
-    }
+    let w = {w with balls =
+	C.map (fun b ->
+	  let open Ball in
+	  let open Vector in
+	  let get = function
+	    | None -> failwith "Empty"
+	    | Some x -> x in
+	  b >>=
+	    (fun b ->
+	      if w.borders.right <> None &&
+		b.pos.x > get w.borders.right -. b.radius then
+		{b with pos = {b.pos with x = get w.borders.right -. b.radius};
+		  speed = {b.speed with x = -.b.speed.x}} else b) >>=
+	    (fun b ->
+	      if w.borders.left <> None &&
+		b.pos.x < get w.borders.left +. b.radius then
+		{b with pos = {b.pos with x = get w.borders.left +. b.radius};
+		  speed = {b.speed with x = -.b.speed.x}} else b) >>=
+	    (fun b ->
+	      if w.borders.top <> None &&
+		b.pos.y > get w.borders.top -. b.radius then
+		{b with pos = {b.pos with y = get w.borders.top -. b.radius};
+		  speed = {b.speed with y = -.b.speed.y}} else b) >>=
+	    (fun b ->
+	      if w.borders.bottom <> None &&
+		b.pos.y < get w.borders.bottom +. b.radius then
+		{b with pos = {b.pos with y = get w.borders.bottom +. b.radius};
+		  speed = {b.speed with y = -.b.speed.y}} else b)) w.balls} in
+
+    {w with balls =
+	C.iterate_solve_collisions b2b_collision_solver (simulate_nc dt w).balls}
 end
