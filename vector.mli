@@ -7,6 +7,7 @@ val scale : float -> t -> t
 val sp : t -> t -> float
 val rot : float -> t -> t
 val norm : t -> float
+val unit : t -> t
 val ( ++ ) : t -> t -> t
 val ( -- ) : t -> t -> t
 val ( ** ) : float -> t -> t

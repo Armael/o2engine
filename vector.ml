@@ -18,6 +18,8 @@ let sp v1 v2 = v1.x *. v2.x +. v1.y *. v2.y
 let rot a v = { x = v.x *. (cos a) -. v.y *. (sin a); y = v.x *. (sin a) +. v.y *. (cos a) }
 (* Norme *)
 let norm v = sqrt (sp v v)
+(* Vecteur unitaire ayant la même direction que v *)
+let unit v = scale (1. /. (norm v)) v
 
 let ( ++ ) = add
 let ( -- ) = sub
