@@ -1,4 +1,5 @@
 module O = Ball
+open Utils
 
 type tree = Void | Leaf of O.t list | Node of O.t list * t * t * t * t
 and
@@ -165,8 +166,6 @@ let rec iter f = function
 let map f depth (c : t) =
   (*retourne l'arbre dont les ŽlŽment o de c sont maintenant
     (fÂ o)*)
-  let fst3 (a,b,c)=a in
-  let snd3 (a,b,c)=b in
   (*applique la fonction f a tous les elements de la liste et les
     rajoute dans le nouvel arbre*)
   let rec aux2 l ntl =
