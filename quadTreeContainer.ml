@@ -4,7 +4,7 @@ open Utils
 type tree = Void | Leaf of O.t list | Node of O.t list * t * t * t * t (* top left, top right, bottom left, bottom right *)
 and
 (*haut gauche - bas droite*)
-t = vect * vect * tree
+t = Vector.t * Vector.t * tree
 
 let is_in_rect v1 v2 ball = 
 (*retourne vrai si le centre de ball est dans le rectangle definie par v1 v2*) 
@@ -19,17 +19,17 @@ let is_in_rect_partial v1 v2 ball =
 (*retourne vrai si ball est en partie dans le rectangle definie par v1 v2*) 
   let open Ball in
   let open Vector in
-  (((ball.pos.x +. ball.rad >= v1.x)
-    && (ball.pos.x +. ball.rad <= v2.x))
+  (((ball.pos.x +. ball.radius >= v1.x)
+    && (ball.pos.x +. ball.radius <= v2.x))
    ||
-     ((ball.pos.x -. ball.rad >= v1.x)
-      && (ball.pos.x -. ball.rad <= v2.x)))
+     ((ball.pos.x -. ball.radius >= v1.x)
+      && (ball.pos.x -. ball.radius <= v2.x)))
   &&
-    (((ball.pos.y +. ball.rad >= v1.y)
-      && (ball.pos.y +. ball.rad) <= v2.y)
+    (((ball.pos.y +. ball.radius >= v1.y)
+      && (ball.pos.y +. ball.radius) <= v2.y)
      ||
-       ((ball.pos.y -. ball.rad >= v1.y)
-	&& (ball.pos.y -. ball.rad <= v2.y)))
+       ((ball.pos.y -. ball.radius >= v1.y)
+	&& (ball.pos.y -. ball.radius <= v2.y)))
 
 let is_in_multiple_sub_rect vx vy ball =	
 (*retourne vrai si ball est dans plusieur sous rectangle*) 
@@ -55,7 +55,8 @@ let rec print =
   | (_, _, Leaf l) -> Printf.printf "Leaf (";
     List.iter (fun b -> Ball.print b; Printf.printf ";") l;
     Printf.printf ")"
-  | (_, _, Node (a, b, c, d)) -> Printf.printf "Node (";
+  | (_, _, Node (l, a, b, c, d)) -> Printf.printf "Node (";
+    List.iter (fun b -> Ball.print b; Printf.printf ";") l;
     print a; Printf.printf "; ";
     print b; Printf.printf "; ";
     print c; Printf.printf "; ";
