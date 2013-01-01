@@ -1,7 +1,7 @@
 module O = Ball
 open Utils
 
-type tree = Void | Leaf of O.t list | Node of O.t list * t * t * t * t
+type tree = Void | Leaf of O.t list | Node of O.t list * t * t * t * t (* top left, top right, bottom left, bottom right *)
 and
 (*haut gauche - bas droite*)
 t = vect * vect * tree
@@ -61,7 +61,7 @@ let rec print =
     print c; Printf.printf "; ";
     print d; Printf.printf ")"
 
-let empty x y  = (x,y,Void) (*arbre vide*)
+let empty x y  = (x, y, Void) (*arbre vide*)
   
 let add o depth c =
   (*ajoute un element o dans c*)
@@ -119,13 +119,8 @@ let remove o c =
   (*retire un element o dans un arbre c*)
   let open Ball in
   let open Vector in
-  let rec delete_list l o =
-    (*retire un element o une liste l*)
-    match l with
-    | [] -> []
-    | x :: ll when x = o -> delete_list ll o
-    | x :: ll -> x :: (delete_list ll o)
-  in
+  (*retire un element o une liste l*)
+  let delete_list l o = List.filter ((<>) o) l in
   let rec aux o c =
     match c with
     | (x, y, Void) -> (x, y, Void)
@@ -158,7 +153,8 @@ let rec iter f = function
   (*iter f dans l'arbre*)
   | (x,y,Void) -> ()
   | (x,y,Leaf (b)) -> List.iter f b
-  | (x,y,Node (lo,hl, hr, ll, lr)) -> iter f hl;
+  | (x,y,Node (lo, hl, hr, ll, lr)) -> 
+    iter f hl;
     iter f hr;
     iter f ll;
     iter f lr
@@ -168,24 +164,21 @@ let map f depth (c : t) =
     (fÂ o)*)
   (*applique la fonction f a tous les elements de la liste et les
     rajoute dans le nouvel arbre*)
-  let rec aux2 l ntl =
-    match l with
-    | [] -> ntl
-    | a :: ll -> aux2 ll (add (f a) depth ntl)
-  in
+  let add_f_all lst ntl = List.fold_left 
+    (fun acc x -> add (f x) depth acc) ntl lst in
   let rec aux t nt =
-    (*applique aux2 a chaque element du noeud ou de la feuille est
-      reitre avec les sous arbres*)
+    (*applique add_f_all a chaque element du noeud ou de la feuille
+      est reitre avec les sous arbres*)
     match t with
     | (x, y, Void) -> nt
     | (x, y, Leaf (b)) ->
-      (aux2 b nt)
+      (add_f_all b nt)
     | (x, y, Node (lo, hl, hr, ll, lr)) ->
       let nhl = (aux hl nt) in
       let nhr = (aux hr nhl) in
       let nll = (aux ll nhr) in
       let nlr = (aux lr nll) in
-      aux2 lo nlr
+      add_f_all lo nlr
   in
   aux c (empty (fst3 c) (snd3 c))
 
