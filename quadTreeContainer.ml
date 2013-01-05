@@ -42,15 +42,40 @@ let is_in_rect_partial v1 v2 ball =
      ||
        ((ball.pos.y -. ball.radius >= v1.y)
 	&& (ball.pos.y -. ball.radius <= v2.y)))
+
+let moy a b = (a +. b) /. 2
     
+let bl_rect v1 v2 =
+  let open Vector in
+  (v1, 
+   {x = moy v1.x v2.x.;
+    y = moy v1.y v2.y)
+
+let br_rect v1 v2 =
+  let open Vector in
+  ({v1 with x = moy v1.x v2.x},
+   {v2 with y = moy v1.y v2.y})
+
+let tl_rect v1 v2 =
+  let open Vector in
+  ({v1 with y = moy v1.y v2.y},
+   {v2 with x = moy v1.x v2.x})
+
+let tr_rect v1 v2 =
+  let open Vector in
+  ({x = moy v1.x v2.x; 
+    y = moy v1.y v2.y},
+   v2)
+
 let is_in_multiple_sub_rect vx vy ball =	
   (* Retourne true si ball est dans plusieurs sous-rectangles *) 
+  let is_in_rect_partial (u, v) b = is_in_rect_partial u v b in
   let open Ball in
   let open Vector in		
-  let br1 = is_in_rect_partial vx {x = (vy.x +. vx.x) /. 2.; y = (vy.y +. vx.y) /. 2.} ball in
-  let br2 = is_in_rect_partial {vx with x = (vy.x +. vx.x) /. 2.} {vy with y = (vy.y +. vx.y) /. 2.} ball in
-  let br3 = is_in_rect_partial {vx with y = (vy.y +. vx.y) /. 2.} {vy with x = (vy.x +. vx.x) /. 2.} ball in
-  let br4 = is_in_rect_partial {x = (vy.x +. vx.x) /. 2.; y = (vy.y +. vx.y) /. 2.} vy ball in
+  let br1 = is_in_rect_partial (bl_rect vx vy) ball in
+  let br2 = is_in_rect_partial (br_rect vx vy) ball in
+  let br3 = is_in_rect_partial (tl_rect vx vy) ball in
+  let br4 = is_in_rect_partial (tr_rect vx vy) ball in
   (br1 && (br2 || br3 || br4))
   || (br2 && (br3 || br4))
   || (br3 && br4)
@@ -101,13 +126,15 @@ let add o depth c =
   let rec constr o depth c =
     match c with
     | (vx, vy, Void) ->
+      let blr = bl_rect vx vy and brr = br_rect vx vy and
+	  tlr = tl_rect vx vy and trr = tr_rect vx vy in
       if (is_in_rect vx vy o) then
 	(* Si o est dans le sous-arbre c *)
 	if (is_in_multiple_sub_rect vx vy o) then
-	  (vx, vy, Node ([o], (vx, {x = (vy.x +. vx.x) /. 2.; y = (vy.y +. vx.y) /. 2.}, Void),
-			 ({vx with x = (vy.x +. vx.x) /. 2.}, {vy with y = (vy.y +. vx.y) /. 2.}, Void),
-			 ({vx with y = (vy.y +. vx.y) /. 2.}, {vy with x = (vy.x +. vx.x) /. 2.}, Void),
-			 ({x = (vy.x +. vx.x) /. 2.; y = (vy.y +. vx.y) /. 2.}, vy, Void)))
+	  (vx, vy, Node ([o], (fst blr, snd blr, Void),
+			 (fst brr, snd brr, Void),
+			 (fst tlr, snd tlr, Void),
+			 (fst trr, snd trr, Void)))
 	(* Si o est dans plusieurs sous-arbres on crée un noeud avec
 	   des sous-arbres vides et on l'ajoute au noeud *)
 	else if (depth = 0) then (vx, vy, Leaf ([o]))
@@ -115,10 +142,10 @@ let add o depth c =
 	   l'ajoute à la feuille *)
 	else constr o depth (vx, vy,
 			     Node ([],
-				   (vx, {x = (vy.x +. vx.x) /. 2.; y = (vy.y +. vx.y) /. 2.}, Void),
-				   ({vx with x = (vy.x +. vx.x) /. 2.}, {vy with y = (vy.y +. vx.y) /. 2.}, Void),
-				   ({vx with y = (vy.y +. vx.y) /. 2.}, {vy with x = (vy.x +. vx.x) /. 2.}, Void),
-				   ({x = (vy.x +. vx.x) /. 2.; y = (vy.y +. vx.y) /. 2.}, vy, Void))
+				   (fst blr, snd blr, Void),
+				   (fst brr, snd brr, Void),
+				   (fst tlr, snd tlr, Void),
+				   (fst trr, snd trr, Void))
 	)
 	(* Si o est dans un unique sous-arbre on crée un noeud et
 	   on le rajoute aux sous-arbres *)
@@ -129,19 +156,19 @@ let add o depth c =
 	(vx, vy, Leaf (o :: l))	(* On ajoute l'objet à la feuille (il est déja à la profondeur max) *)
       else
 	c	(* Retourne l'arbre courant si l'objet ne peut pas être ajouté *)
-    | (vx, vy, Node (lo, hl, hr, ll, lr)) ->
+    | (vx, vy, Node (lo, bl, br, tl, tr)) ->
       if (is_in_rect vx vy o) then
 	(* o est dans le sous-arbre *)
 	if (is_in_multiple_sub_rect vx vy o) then
 	  (* Si o est dans plusieurs sous-arbres on l'ajoute au nœud *)
-	  (vx, vy, Node (o :: lo, hl, hr, ll, lr))
+	  (vx, vy, Node (o :: lo, bl, br, tl, tr))
 	else
 	  (* Sinon on le rajoute aux sous-arbres *)
 	  (vx, vy, Node (lo,
-			 constr o (depth - 1) hl,
-			 constr o (depth - 1) hr,
-			 constr o (depth - 1) ll,
-			 constr o (depth - 1) lr
+			 constr o (depth - 1) bl,
+			 constr o (depth - 1) br,
+			 constr o (depth - 1) tl,
+			 constr o (depth - 1) tr
 	   ))
       else c (* Retourne l'arbre courant si l'objet ne peut pas être ajouté *)
   in constr o depth c
@@ -162,18 +189,18 @@ let remove o c =
       else (x, y, Leaf (nl))
     (* else c (--à rajouter peut-être--) *)
 
-    | (x, y, Node (lo, hl, hr, ll, lr)) ->
+    | (x, y, Node (lo, bl, br, tl, tr)) ->
       if is_in_rect x y o then
 	begin
-	  let (x1, y1, qt1) = aux o hl in
-	  let (x2, y2, qt2) = aux o hr in
-	  let (x3, y3, qt3) = aux o ll in
-	  let (x4, y4, qt4) = aux o lr in
+	  let (x1, y1, qt1) = aux o bl in
+	  let (x2, y2, qt2) = aux o br in
+	  let (x3, y3, qt3) = aux o tl in
+	  let (x4, y4, qt4) = aux o tr in
 	  let newl = delete_list lo o in (* On essaye de retirer l'élément sur le noeud et dans les sous arbres *)
 	  if (qt4 = Void && qt3 = Void && qt2 = Void && qt1 = Void && newl = [])
-	  then (x, y, Void)  
+	  then (x, y, Void)
 	  (* Si il n'y a plus d'éléments dans l'arbre on retourne Void *)
-	  else (x,y,Node (newl, (x1, y1, qt1), (x2, y2, qt2), (x3, y3, qt3), (x4, y4, qt4)))
+	  else (x,y, Node (newl, (x1, y1, qt1), (x2, y2, qt2), (x3, y3, qt3), (x4, y4, qt4)))
 	(* Sinon, retourner l'arbre sans o *)
 	end
       else c (* Retourne c si o ne peut pas être dans le sous-arbre *)
@@ -184,11 +211,11 @@ let rec iter f = function
   (* itère f dans l'arbre *)
   | (x,y,Void) -> ()
   | (x,y,Leaf (b)) -> List.iter f b
-  | (x,y,Node (lo, hl, hr, ll, lr)) -> 
-    iter f hl;
-    iter f hr;
-    iter f ll;
-    iter f lr
+  | (x,y,Node (lo, bl, br, tl, tr)) -> 
+    iter f bl;
+    iter f br;
+    iter f tl;
+    iter f tr
     
 let map f depth (c : t) =
   (* retourne l'arbre dont les élément o de c sont maintenant
@@ -204,12 +231,12 @@ let map f depth (c : t) =
     | (x, y, Void) -> nt
     | (x, y, Leaf (b)) ->
       (add_f_all b nt)
-    | (x, y, Node (lo, hl, hr, ll, lr)) ->
-      let nhl = (aux hl nt) in
-      let nhr = (aux hr nhl) in
-      let nll = (aux ll nhr) in
-      let nlr = (aux lr nll) in
-      add_f_all lo nlr
+    | (x, y, Node (lo, bl, br, tl, tr)) ->
+      let nbl = (aux bl nt) in
+      let nbr = (aux br nbl) in
+      let ntl = (aux tl nbr) in
+      let ntr = (aux tr ntl) in
+      add_f_all lo ntr
   in
   aux c (empty (fst3 c) (snd3 c))
 
