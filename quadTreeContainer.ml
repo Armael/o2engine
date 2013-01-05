@@ -12,7 +12,7 @@ open Utils
 
    Let deux Vectors attachés à chaque arbre dans le type t décrivent
    la surface couvert par l'arbre, et correspondent respectivement aux
-   coordonnées du coin en bas à gauche
+   coordonnées du coin en bas à gauche et du coin en haut à droite
 *)
 type tree = Void | Leaf of O.t list | Node of O.t list * t * t * t * t 
 and t = Vector.t * Vector.t * tree
