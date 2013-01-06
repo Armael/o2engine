@@ -1,5 +1,5 @@
 open Utils
-
+open MainWindow
 module PhysEngine = Phys.Make (ListContainer)
 module Engine = Engine.Make (PhysEngine) (Screen)
 
@@ -34,16 +34,44 @@ let rec add_random_balls xm ym n w =
 let () =
   let open Screen in
   let open Engine in
+  let i = openWindow() in
+  
   let world = Engine.new_world () in
   Random.self_init ();
   let xm = float world.buff.width in
-  let ym = float world.buff.height in
-
-
+  let ym = float world.buff.height in 
   let open Ball in
   let open Vector in
-
-  world >>=
+		match i with
+		|0->
+		let rec ballsWithCoordList l rad w=
+			match l with
+			|[]->w
+			|(x,y,i)::ll-> let newBall = Ball.create() in
+						ballsWithCoordList ll rad (add_ball {newBall with pos = {x = x;y = y}; radius = rad;id = i} w)
+			in
+			world >>=
+    borders_follow_buffer_size true >>=
+    ballsWithCoordList [(50.,ym/.2.,0);(xm/.2. ,ym/.2.,1);((xm/.2.) +. 30.,(ym/.2.) +. 30.,1);
+    ((xm/.2.) +. 30.,(ym/.2.) -. 30.,1);(xm/.2. +. 60. ,ym/.2.,1);(xm/.2. +. 60. ,ym/.2.+. 60.,1);
+    (xm/.2. +. 60. ,ym/.2.-. 60.,1);(xm/.2. +. 90. ,ym/.2.-. 30.,1);(xm/.2. +. 90. ,ym/.2.-. 90.,1);
+    (xm/.2. +. 90. ,ym/.2.+. 30.,1);(xm/.2. +. 90. ,ym/.2.+. 90.,1)] 20.>>= 
+    set_restitution 0.8 >>=
+    run 60
+    
+  |1->world >>=
+    borders_follow_buffer_size true >>=
+    add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
+    add_random_balls xm ym 70 >>= 
+    set_restitution 0.8 >>=
+    run 60
+  |2->world >>=
+    borders_follow_buffer_size true >>=
+    add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
+    add_random_balls xm ym 70 >>= 
+    set_restitution 0.8 >>=
+    run 60
+  |_->world >>=
     borders_follow_buffer_size true >>=
     add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
     add_random_balls xm ym 70 >>= 
