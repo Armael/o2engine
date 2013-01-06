@@ -125,27 +125,28 @@ struct
 	  let get = function
 	    | None -> failwith "Empty"
 	    | Some x -> x in
+	  let c = w.restitution in
 	  b >>=
 	    (fun b ->
 	      if w.borders.right <> None &&
 		b.pos.x > get w.borders.right -. b.radius then
 		{b with pos = {b.pos with x = get w.borders.right -. b.radius};
-		  speed = {b.speed with x = -.b.speed.x}} else b) >>=
+		  speed = {b.speed with x = -. c *. b.speed.x}} else b) >>=
 	    (fun b ->
 	      if w.borders.left <> None &&
 		b.pos.x < get w.borders.left +. b.radius then
 		{b with pos = {b.pos with x = get w.borders.left +. b.radius};
-		  speed = {b.speed with x = -.b.speed.x}} else b) >>=
+		  speed = {b.speed with x = -. c *. b.speed.x}} else b) >>=
 	    (fun b ->
 	      if w.borders.top <> None &&
 		b.pos.y > get w.borders.top -. b.radius then
 		{b with pos = {b.pos with y = get w.borders.top -. b.radius};
-		  speed = {b.speed with y = -.b.speed.y}} else b) >>=
+		  speed = {b.speed with y = -. c *. b.speed.y}} else b) >>=
 	    (fun b ->
 	      if w.borders.bottom <> None &&
 		b.pos.y < get w.borders.bottom +. b.radius then
 		{b with pos = {b.pos with y = get w.borders.bottom +. b.radius};
-		  speed = {b.speed with y = -.b.speed.y}} else b)) w.balls}
+		  speed = {b.speed with y = -. c *. b.speed.y}} else b)) w.balls}
 
   (* Simule le mouvement d'une balle sans tenir compte des collisions
      pendant dt *)
