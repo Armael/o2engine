@@ -117,6 +117,36 @@ struct
       let b2 = {b2 with speed = b2.speed -- (im2 ** impulse)} in
       (b1, b2)
 
+  let solve_wall_collisions w =
+    {w with balls =
+	C.map (fun b ->
+	  let open Ball in
+	  let open Vector in
+	  let get = function
+	    | None -> failwith "Empty"
+	    | Some x -> x in
+	  b >>=
+	    (fun b ->
+	      if w.borders.right <> None &&
+		b.pos.x > get w.borders.right -. b.radius then
+		{b with pos = {b.pos with x = get w.borders.right -. b.radius};
+		  speed = {b.speed with x = -.b.speed.x}} else b) >>=
+	    (fun b ->
+	      if w.borders.left <> None &&
+		b.pos.x < get w.borders.left +. b.radius then
+		{b with pos = {b.pos with x = get w.borders.left +. b.radius};
+		  speed = {b.speed with x = -.b.speed.x}} else b) >>=
+	    (fun b ->
+	      if w.borders.top <> None &&
+		b.pos.y > get w.borders.top -. b.radius then
+		{b with pos = {b.pos with y = get w.borders.top -. b.radius};
+		  speed = {b.speed with y = -.b.speed.y}} else b) >>=
+	    (fun b ->
+	      if w.borders.bottom <> None &&
+		b.pos.y < get w.borders.bottom +. b.radius then
+		{b with pos = {b.pos with y = get w.borders.bottom +. b.radius};
+		  speed = {b.speed with y = -.b.speed.y}} else b)) w.balls}
+
   (* Simule le mouvement d'une balle sans tenir compte des collisions
      pendant dt *)
   let simulate_ball_nc dt w b =
@@ -145,34 +175,7 @@ struct
 
   (* Simule l'évolution du monde pendant un temps dt *)
   let simulate dt w = 
-    let w = {w with balls =
-	C.map (fun b ->
-	  let open Ball in
-	  let open Vector in
-	  let get = function
-	    | None -> failwith "Empty"
-	    | Some x -> x in
-	  b >>=
-	    (fun b ->
-	      if w.borders.right <> None &&
-		b.pos.x > get w.borders.right -. b.radius then
-		{b with pos = {b.pos with x = get w.borders.right -. b.radius};
-		  speed = {b.speed with x = -.b.speed.x}} else b) >>=
-	    (fun b ->
-	      if w.borders.left <> None &&
-		b.pos.x < get w.borders.left +. b.radius then
-		{b with pos = {b.pos with x = get w.borders.left +. b.radius};
-		  speed = {b.speed with x = -.b.speed.x}} else b) >>=
-	    (fun b ->
-	      if w.borders.top <> None &&
-		b.pos.y > get w.borders.top -. b.radius then
-		{b with pos = {b.pos with y = get w.borders.top -. b.radius};
-		  speed = {b.speed with y = -.b.speed.y}} else b) >>=
-	    (fun b ->
-	      if w.borders.bottom <> None &&
-		b.pos.y < get w.borders.bottom +. b.radius then
-		{b with pos = {b.pos with y = get w.borders.bottom +. b.radius};
-		  speed = {b.speed with y = -.b.speed.y}} else b)) w.balls} in
+    let w = solve_wall_collisions w in
 
     {w with balls =
 	C.iterate_solve_collisions (b2b_collision_solver w) (simulate_nc dt w).balls}
