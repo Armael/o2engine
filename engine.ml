@@ -73,10 +73,6 @@ struct
   let run fps world =
     let dt = 1. /. (float fps) in
 
-    let wait_pass d w =
-      Utils.sleep d;
-      w in
-
     let update_borders w = 
       let open G in
       G.update w.buff; 
@@ -91,11 +87,11 @@ struct
     let simulate dt w = {w with phys = P.simulate dt w.phys} in
 
     let rec loop dt w =
-      w >>=
-	wait_pass dt >>=
-	update_borders >>= 
-	simulate dt >>=
-	display >>=
+      (run_wait (fun () ->
+	w >>=
+	  update_borders >>= 
+	  simulate dt >>=
+	  display) dt) >>=
 	loop dt in
 
     loop dt world
