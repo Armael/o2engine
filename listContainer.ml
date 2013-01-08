@@ -43,5 +43,6 @@ let iterate_solve_collisions solver cont =
       let (new_it, loc') = solve_collision it (next loc) in
       let (p, u, n) = prev loc' in
       iterate (next (p, new_it, n)) in
-
-  iterate (start_loc cont)
+  
+  if cont = [] then [] else
+    iterate (start_loc cont)
