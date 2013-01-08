@@ -43,13 +43,13 @@ let is_in_rect_partial v1 v2 ball =
        ((ball.pos.y -. ball.radius >= v1.y)
 	&& (ball.pos.y -. ball.radius <= v2.y)))
 
-let moy a b = (a +. b) /. 2
+let moy a b = (a +. b) /. 2.
     
 let bl_rect v1 v2 =
   let open Vector in
   (v1, 
-   {x = moy v1.x v2.x.;
-    y = moy v1.y v2.y)
+   {x = moy v1.x v2.x;
+    y = moy v1.y v2.y})
 
 let br_rect v1 v2 =
   let open Vector in
