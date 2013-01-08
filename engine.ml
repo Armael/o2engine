@@ -44,38 +44,53 @@ struct
     phys : P.world;
     buff : G.buffer;
     borders_follow_buff_size : bool;
-    predraw_hook : G.buffer -> unit;
-    postdraw_hook : G.buffer -> unit;
+    predraw_hook : (int * (G.buffer -> unit)) list;
+    postdraw_hook : (int * (G.buffer -> unit)) list;
+    predraw_hook_number : int;
+    postdraw_hook_number : int
   }
+  
   type border_type = P.border_type
   let new_world () = {
     phys = P.new_world ();
     buff = G.open_buffer ();
     borders_follow_buff_size = false;
-    predraw_hook = (fun _ -> ());
-    postdraw_hook = (fun _ -> ())
-  }
+    predraw_hook = [];
+    postdraw_hook = [];
+    predraw_hook_number = 0;
+    postdraw_hook_number = 0
+ }
+  
   let set_border border_type value w = {w with phys = P.set_border border_type value w.phys}
   let unset_border border_type w = {w with phys = P.unset_border border_type w.phys}
   let set_restitution value w = {w with phys = P.set_restitution value w.phys}
   let borders_follow_buffer_size bool w = {w with borders_follow_buff_size = bool}
   let add_ball b w = {w with phys = P.add_ball b w.phys}
   let add_f f w = {w with phys = P.add_f f w.phys}
-  let set_predraw_hook f w = {w with predraw_hook = f}
-  let set_postdraw_hook f w = {w with postdraw_hook = f}
+  let set_predraw_hook lf w = {w with predraw_hook = lf}
+  let set_postdraw_hook lf w = {w with postdraw_hook = lf}
+  let add_predraw_hook f w = (w.predraw_hook_number + 1, {w with predraw_hook = (w.predraw_hook_number + 1, f)::w.predraw_hook})
+  let add_postdraw_hook f w = (w.postdraw_hook_number + 1, {w with postdraw_hook = (w.postdraw_hook_number + 1, f)::w.postdraw_hook})
+  	let remove_hook i l = List.filter (fun (j,_) -> j = i) l
+  let remove_predraw_hook i w =
+  {w with predraw_hook = remove_hook i w.predraw_hook}
+  let remove_postdraw_hook i w =
+  {w with postdraw_hook = remove_hook i w.postdraw_hook}
+   
+
 
   let display w =
     let open Ball in
     let open Vector in
     G.draw (fun buf ->
       G.clear buf;
-      w.predraw_hook buf;
+      List.iter (fun c -> snd c buf) w.predraw_hook;
       P.iter (fun b ->
 	G.set_color b.color buf;
 	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
 	G.set_color Color.black buf
       ) w.phys;
-      w.postdraw_hook buf) w.buff;
+      List.iter (fun c -> snd c buf) w.postdraw_hook) w.buff;
     w
 
   let run fps world =
