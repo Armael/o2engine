@@ -43,7 +43,9 @@ struct
   type world = {
     phys : P.world;
     buff : G.buffer;
-    borders_follow_buff_size : bool
+    borders_follow_buff_size : bool;
+    predraw_hook : G.buffer -> unit;
+    postdraw_hook : G.buffer -> unit;
   }
   type border_type = P.border_type
   let new_world () = {
@@ -57,17 +59,21 @@ struct
   let borders_follow_buffer_size bool w = {w with borders_follow_buff_size = bool}
   let add_ball b w = {w with phys = P.add_ball b w.phys}
   let add_f f w = {w with phys = P.add_f f w.phys}
+  let set_predraw_hook f w = {w with predraw_hook = f}
+  let set_postdraw_hook f w = {w with postdraw_hook = f}
 
   let display w =
     let open Ball in
     let open Vector in
     G.draw (fun buf ->
       G.clear buf;
+      w.predraw_hook buf;
       P.iter (fun b ->
 	G.set_color b.color buf;
 	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
 	G.set_color Color.black buf
-      ) w.phys) w.buff;
+      ) w.phys;
+      w.postdraw_hook buf) w.buff;
     w
 
   let run fps world =
