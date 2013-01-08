@@ -51,7 +51,9 @@ struct
   let new_world () = {
     phys = P.new_world ();
     buff = G.open_buffer ();
-    borders_follow_buff_size = false
+    borders_follow_buff_size = false;
+    predraw_hook = (fun _ -> ());
+    postdraw_hook = (fun _ -> ())
   }
   let set_border border_type value w = {w with phys = P.set_border border_type value w.phys}
   let unset_border border_type w = {w with phys = P.unset_border border_type w.phys}
