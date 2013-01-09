@@ -1,5 +1,7 @@
 open Utils
 open MainWindow
+open Phys
+
 module PhysEngine = Phys.Make (ListContainer)
 module Engine = Engine.Make (PhysEngine) (Screen)
 
@@ -44,19 +46,46 @@ let () =
   let open Vector in
 		match i with
 		|0->
+		let etape = ref false in
+   	let posmem = ref(0,0) in
+
 		let rec ballsWithCoordList l rad w=
 			match l with
 			|[]->w
+			|(x,y,i)::ll when i = 0-> let newBall = Ball.create() in
+						ballsWithCoordList ll rad (add_ball {newBall with pos = {x = x;y = y}; radius = rad;id = i; mass =5.;color = Color.blue} w)
 			|(x,y,i)::ll-> let newBall = Ball.create() in
-						ballsWithCoordList ll rad (add_ball {newBall with pos = {x = x;y = y}; radius = rad;id = i} w)
+						ballsWithCoordList ll rad (add_ball {newBall with pos = {x = x;y = y}; radius = rad;id = i; mass =5.;color = Color.red} w)
+
 			in
 			world >>=
+			set_world_keypress_handler (fun c -> ())>>=
+	  	  set_world_button_handler (fun b -> b)>>=
+	  	  	set_world_pos_handler (fun (i,j) -> (i,j))>>=
+   		set_predraw_hook 
+   	  [
+   		(0,(fun (a,b,p) (buf:Screen.buffer) (w : (unit, bool, (int*int)) Engine.world) -> 
+   	  match a,b,p,!etape with
+   	  |Some (),_,_,_-> w
+   	  |_,Some true,Some(i,j),false ->
+   	  																print_int 5;
+   	  																etape := true; 
+   	  																posmem := (i,j);
+   																	w;
+   	  | _,Some true,Some(i,j),true ->    	  						
+   	  user_map
+   	  (fun b ->
+   		match b.id with
+   		|0->{b with speed = {x = float_of_int (fst (!posmem) - i);y = float_of_int (snd (!posmem) - j)}}
+   		|_->b) w
+   		|_,_,_,_->w))
+   		] >>=
     borders_follow_buffer_size true >>=
     ballsWithCoordList [(50.,ym/.2.,0);(xm/.2. ,ym/.2.,1);((xm/.2.) +. 30.,(ym/.2.) +. 30.,1);
     ((xm/.2.) +. 30.,(ym/.2.) -. 30.,1);(xm/.2. +. 60. ,ym/.2.,1);(xm/.2. +. 60. ,ym/.2.+. 60.,1);
     (xm/.2. +. 60. ,ym/.2.-. 60.,1);(xm/.2. +. 90. ,ym/.2.-. 30.,1);(xm/.2. +. 90. ,ym/.2.-. 90.,1);
-    (xm/.2. +. 90. ,ym/.2.+. 30.,1);(xm/.2. +. 90. ,ym/.2.+. 90.,1)] 20.>>= 
-    set_restitution 0.8 >>=
+    (xm/.2. +. 90. ,ym/.2.+. 30.,1);(xm/.2. +. 90. ,ym/.2.+. 90.,1)] 20. >>= 
+  	  set_restitution 0.8 >>=
     run 60
     
   |1->world >>=
