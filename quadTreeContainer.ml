@@ -21,7 +21,7 @@ and t = Vector.t * Vector.t * tree
   let open Vector in
 
 let is_in_tree t ball =
-(* Retourne true si ball est dans l'arbre t *) 
+  (* Retourne true si ball est dans l'arbre t *)
   match t with 
     (v1, v2, _) -> Rect.is_in_rect v1 v2 ball
 
@@ -88,8 +88,8 @@ let add o depth c =
 				   (fst tlr, snd tlr, Void),
 				   (fst trr, snd trr, Void))
 	)
-	(* Si o est dans un unique sous-arbre on crée un noeud et
-	   on le rajoute aux sous-arbres *)
+	(* Si o est dans un unique sous-arbre on crée un noeud et on
+	   le rajoute aux sous-arbres *)
 	else c;	(* On retourne l'arbre courant si l'objet ne peut pas être ajouté *)
 
     | (vx, vy, Leaf (l)) ->
@@ -162,12 +162,12 @@ let map f depth (c : t) =
   (* retourne l'arbre dont les élément o de c sont maintenant
     (f o) *)
   (* applique la fonction f a tous les elements de la liste et les
-    rajoute dans le nouvel arbre *)
+     rajoute dans le nouvel arbre *)
   let add_f_all lst ntl = List.fold_left 
     (fun acc x -> add (f x) depth acc) ntl lst in
   let rec aux t nt =
     (* applique add_f_all a chaque element du noeud ou de la feuille
-      est reitère avec les sous arbres *)
+       est reitère avec les sous arbres *)
     match t with
     | (x, y, Void) -> nt
     | (x, y, Leaf (b)) ->
