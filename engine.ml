@@ -1,4 +1,5 @@
 open Utils
+open Event
 
 module type PhysEngine = sig
   type border_type =
@@ -6,6 +7,8 @@ module type PhysEngine = sig
   type world
   val new_world : unit -> world
   val iter : (Ball.t -> unit) -> world -> unit
+  val map : (Ball.t -> Ball.t) -> world -> world
+
   val set_border : border_type -> float -> world -> world
   val unset_border : border_type -> world -> world
   val set_restitution : float -> world -> world
@@ -40,14 +43,15 @@ module Make =
   functor (P : PhysEngine) ->
     functor (G : GraphicEngine) ->
 struct
-  type world = {
+  type ('a,'b,'c) world = {
     phys : P.world;
     buff : G.buffer;
     borders_follow_buff_size : bool;
-    predraw_hook : (int * (G.buffer -> unit)) list;
-    postdraw_hook : (int * (G.buffer -> unit)) list;
+    predraw_hook : (int * ((('a option) * ('b option) * ('c option)) -> G.buffer -> ('a,'b,'c) world-> ('a,'b,'c) world)) list;
+    postdraw_hook : (int * ((('a option) * ('b option) * ('c option)) -> G.buffer -> ('a,'b,'c) world -> ('a,'b,'c) world)) list;
     predraw_hook_number : int;
-    postdraw_hook_number : int
+    postdraw_hook_number : int;
+    engine_handler : ('a,'b,'c) Event.event_handler
   }
   
   type border_type = P.border_type
@@ -58,7 +62,8 @@ struct
     predraw_hook = [];
     postdraw_hook = [];
     predraw_hook_number = 0;
-    postdraw_hook_number = 0
+    postdraw_hook_number = 0;
+    engine_handler = create_handler ()
  }
   
   let set_border border_type value w = {w with phys = P.set_border border_type value w.phys}
@@ -76,22 +81,24 @@ struct
   {w with predraw_hook = remove_hook i w.predraw_hook}
   let remove_postdraw_hook i w =
   {w with postdraw_hook = remove_hook i w.postdraw_hook}
-   
-
+  let set_world_keypress_handler fkh w = {w with predraw_hook = [] ; postdraw_hook = [] ; engine_handler = {w.engine_handler with keypress_handler = fkh}}
+  let set_world_button_handler fbh w ={w with predraw_hook = [] ; postdraw_hook = [] ; engine_handler =  {w.engine_handler with button_handler = fbh}}
+  let set_world_pos_handler fph w = {w with predraw_hook = [] ; postdraw_hook = [] ; engine_handler =  {w.engine_handler with pos_handler = fph}}
 
   let display w =
     let open Ball in
     let open Vector in
+    let event_result = handle_event w.engine_handler in
+    let pre_new_w = List.fold_right (fun c -> (snd c event_result w.buff)) w.predraw_hook w in
     G.draw (fun buf ->
       G.clear buf;
-      List.iter (fun c -> snd c buf) w.predraw_hook;
       P.iter (fun b ->
 	G.set_color b.color buf;
 	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
 	G.set_color Color.black buf
-      ) w.phys;
-      List.iter (fun c -> snd c buf) w.postdraw_hook) w.buff;
-    w
+      ) pre_new_w.phys;) pre_new_w.buff;
+      let post_new_w = List.fold_right (fun c -> (snd c event_result pre_new_w.buff)) pre_new_w.postdraw_hook pre_new_w in
+    post_new_w
 
   let run fps world =
     let dt = 1. /. (float fps) in
@@ -118,4 +125,8 @@ struct
 	loop dt in
 
     loop dt world
+    
+  let user_map f w = 
+  {w with phys = P.map f w.phys}
+
 end

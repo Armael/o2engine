@@ -180,4 +180,7 @@ struct
 
     {w with balls =
 	C.iterate_solve_collisions (b2b_collision_solver w) (simulate_nc dt w).balls}
+	
+	let map f w = {w with balls = C.map f w.balls}
+
 end
