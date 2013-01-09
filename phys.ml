@@ -109,19 +109,19 @@ struct
     let open Vector in
     let delta = b1.pos -- b2.pos in
     let d = norm delta in
-    let mtd = (((b1.radius +. b2.radius) -. d) /. d) ** delta in
-    let mtd_unit = unit mtd in
+    let d_unit = unit delta in
+    let mtd = ((b1.radius +. b2.radius) -. d) ** d_unit in
     
     let im1 = 1. /. b1.mass and im2 = 1. /. b2.mass in
     let b1 = {b1 with pos = b1.pos ++ ((im1 /. (im1 +. im2)) ** mtd)} in
     let b2 = {b2 with pos = b2.pos -- ((im2 /. (im1 +. im2)) ** mtd)} in
     
     let v = b1.speed -- b2.speed in
-    let vn = v |. mtd_unit in
+    let vn = v |. d_unit in
     
     if vn > 0. then (b1, b2) else
       let i = (-.(1. +. w.restitution) *. vn) /. (im1 +. im2) in
-      let impulse = i ** mtd_unit in
+      let impulse = i ** d_unit in
       let b1 = {b1 with speed = b1.speed ++ (im1 ** impulse)} in
       let b2 = {b2 with speed = b2.speed -- (im2 ** impulse)} in
       (b1, b2)
