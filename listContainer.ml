@@ -32,8 +32,10 @@ let end_loc l = let r = List.rev l in
 	    (List.tl r, List.hd r, [])
 
 let iterate_solve_collisions solver cont =
+  (* iterate: O.t loc -> O.t list *)
   let rec iterate (p, it, n) =
     let loc = (p, it, n) in
+    (* solve_collision: O.t -> O.t loc -> O.t * O.t loc *)
     let rec solve_collision it (p, obj, n) =
       if O.is_colliding it obj then (
 	let (new_it, new_obj) = solver it obj in

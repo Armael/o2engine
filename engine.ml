@@ -89,7 +89,6 @@ struct
   {w with postdraw_hook = remove_hook i w.postdraw_hook}
    
 
-
   let display w =
     let open Ball in
     let open Vector in

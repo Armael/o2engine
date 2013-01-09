@@ -45,7 +45,8 @@ let rec print =
     print a; Printf.printf "; ";
     print b; Printf.printf "; ";
     print c; Printf.printf "; ";
-    print d; Printf.printf ")"
+    print d; Printf.printf ")";
+    print_endline ""
 
 let rec display (v1, v2, t) =
   (* Dessine le quadTree et les balles contenues (attention, un buffer

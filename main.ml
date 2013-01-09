@@ -1,6 +1,8 @@
 open Utils
 open MainWindow
-module PhysEngine = Phys.Make (ListContainer)
+
+module C = ListContainer
+module PhysEngine = Phys.Make (C)
 module Engine = Engine.Make (PhysEngine) (Screen)
 
 let rec add_random_balls xm ym n w =
@@ -23,7 +25,7 @@ let rec add_random_balls xm ym n w =
     
     let open Engine in
     let open PhysEngine in
-    if ListContainer.is_colliding rand_ball w.phys.balls then
+    if C.is_colliding rand_ball w.phys.balls then
       add_random_balls xm ym n w
     else (
       add_random_balls xm ym (n-1) 
