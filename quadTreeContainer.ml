@@ -161,7 +161,7 @@ let rec iter f = function
   (* itère f dans l'arbre *)
   | (x,y,Void) -> ()
   | (x,y,Leaf (b)) -> List.iter f b
-  | (x,y,Node (lo, bl, br, tl, tr)) -> 
+  | (x,y,Node (lo, bl, br, tl, tr)) -> List.iter f lo;
     iter f bl;
     iter f br;
     iter f tl;
