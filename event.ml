@@ -5,11 +5,11 @@ button_handler : bool -> 'b;
 pos_handler : (int*int)-> 'c 
 }
 
-let create_handler ()= 
+let create_handler x y z= 
 {
-keypress_handler = (fun c -> ());
-button_handler = (fun b -> ());
-pos_handler = (fun (i,j)->()) 
+keypress_handler = (fun c -> x);
+button_handler = (fun b -> y);
+pos_handler = (fun (i,j)-> z) 
 }
 
 let set_keypress_handler fkh h={h with keypress_handler = fkh}
