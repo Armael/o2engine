@@ -1,89 +1,29 @@
 module O = Ball
 open Utils
 
-(* Rappel: On considère ici (comme le module Graphics) que le point de
-   coordonnées (0, 0) est en bas à gauche. Cela ne change rien aux
-   algorithmes décrits ici, mais permet d'avoir des notations (top
-   left, …) correspondant à ce qui apparait effectivement à l'écran
-*)
+ (* Rappel: On considère ici (comme le module Graphics) que le point de
+    coordonnées (0, 0) est en bas à gauche. Cela ne change rien aux
+    algorithmes décrits ici, mais permet d'avoir des notations (top
+    left, …) correspondant à ce qui apparait effectivement à l'écran
+ *)
 
-(* Les quatre sous-arbres attachés par un Node sont respectivement les
-   sous arbres : bottom left, bottom right, top left, top right
+ (* Les quatre sous-arbres attachés par un Node sont respectivement les
+    sous arbres : bottom left, bottom right, top left, top right
 
-   Let deux Vectors attachés à chaque arbre dans le type t décrivent
-   la surface couvert par l'arbre, et correspondent respectivement aux
-   coordonnées du coin en bas à gauche et du coin en haut à droite
-*)
+    Let deux Vectors attachés à chaque arbre dans le type t décrivent
+    la surface couvert par l'arbre, et correspondent respectivement aux
+    coordonnées du coin en bas à gauche et du coin en haut à droite
+ *)
+
+
 type tree = Void | Leaf of O.t list | Node of O.t list * t * t * t * t 
 and t = Vector.t * Vector.t * tree
-
-let is_in_rect v1 v2 ball = 
-  (* Retourne true si le centre de ball est dans le rectangle défini par v1 et v2 *) 
-  let open Ball in
   let open Vector in
-  (ball.pos.x >= v1.x
-   && ball.pos.x <= v2.x
-   && ball.pos.y >= v1.y
-   && ball.pos.y <= v2.y)
 
-let is_in_rect_partial v1 v2 ball =
-  (* Retourne true si ball est en partie dans le rectangle défini par
-     v1 et v2 (son centre est en dedans mais elle peut dépasser) *)
-  let open Ball in
-  let open Vector in
-  (((ball.pos.x +. ball.radius >= v1.x)
-    && (ball.pos.x +. ball.radius <= v2.x))
-   ||
-     ((ball.pos.x -. ball.radius >= v1.x)
-      && (ball.pos.x -. ball.radius <= v2.x)))
-  &&
-    (((ball.pos.y +. ball.radius >= v1.y)
-      && (ball.pos.y +. ball.radius) <= v2.y)
-     ||
-       ((ball.pos.y -. ball.radius >= v1.y)
-	&& (ball.pos.y -. ball.radius <= v2.y)))
-
-let moy a b = (a +. b) /. 2.
-    
-let bl_rect v1 v2 =
-  let open Vector in
-  (v1, 
-   {x = moy v1.x v2.x;
-    y = moy v1.y v2.y})
-
-let br_rect v1 v2 =
-  let open Vector in
-  ({v1 with x = moy v1.x v2.x},
-   {v2 with y = moy v1.y v2.y})
-
-let tl_rect v1 v2 =
-  let open Vector in
-  ({v1 with y = moy v1.y v2.y},
-   {v2 with x = moy v1.x v2.x})
-
-let tr_rect v1 v2 =
-  let open Vector in
-  ({x = moy v1.x v2.x; 
-    y = moy v1.y v2.y},
-   v2)
-
-let is_in_multiple_sub_rect vx vy ball =	
-  (* Retourne true si ball est dans plusieurs sous-rectangles *) 
-  let is_in_rect_partial (u, v) b = is_in_rect_partial u v b in
-  let open Ball in
-  let open Vector in		
-  let br1 = is_in_rect_partial (bl_rect vx vy) ball in
-  let br2 = is_in_rect_partial (br_rect vx vy) ball in
-  let br3 = is_in_rect_partial (tl_rect vx vy) ball in
-  let br4 = is_in_rect_partial (tr_rect vx vy) ball in
-  (br1 && (br2 || br3 || br4))
-  || (br2 && (br3 || br4))
-  || (br3 && br4)
-    
 let is_in_tree t ball =
 (* Retourne true si ball est dans l'arbre t *) 
   match t with 
-    (v1, v2, _) -> is_in_rect v1 v2 ball
+    (v1, v2, _) -> Rect.is_in_rect v1 v2 ball
 
 let rec print = 
   (* Écrit la structure d'arbre sur la sortie standard *)
@@ -123,6 +63,7 @@ let add o depth c =
   (* Ajoute un élément o dans c, de profondeur maximale depth *)
   let open Ball in
   let open Vector in
+  let open Rect in
   let rec constr o depth c =
     match c with
     | (vx, vy, Void) ->
@@ -190,7 +131,7 @@ let remove o c =
     (* else c (--à rajouter peut-être--) *)
 
     | (x, y, Node (lo, bl, br, tl, tr)) ->
-      if is_in_rect x y o then
+      if Rect.is_in_rect x y o then
 	begin
 	  let (x1, y1, qt1) = aux o bl in
 	  let (x2, y2, qt2) = aux o br in
