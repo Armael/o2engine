@@ -18,7 +18,15 @@ open Utils
 
 type tree = Void | Leaf of O.t list | Node of O.t list * t * t * t * t 
 and t = Vector.t * Vector.t * tree
+
+let log2 x = (log x) /. (log 2.)
+
+let get_depth v1 v2 =
+  (* Retourne la profondeur adéquate pour avoir des feuilles d'environ
+     size px de côté *)
   let open Vector in
+  let size = 30. in
+  int_of_float (max (log2 ((v2.x -. v1.x) /. size)) (log2 ((v2.y -. v1.y) /. size)))
 
 let is_in_tree t ball =
   (* Retourne true si ball est dans l'arbre t *)
@@ -58,8 +66,9 @@ let rec display (v1, v2, t) =
   | _ -> ()
 
 let empty x y  = (x, y, Void) (* Retourne un arbre vide *)
-  
-let add o depth c =
+
+let add o c =
+  let depth = get_depth (fst3 c) (snd3 c) in
   (* Ajoute un élément o dans c, de profondeur maximale depth *)
   let open Ball in
   let open Vector in
@@ -157,14 +166,13 @@ let rec iter f = function
     iter f br;
     iter f tl;
     iter f tr
-    
-let map f depth (c : t) =
-  (* retourne l'arbre dont les élément o de c sont maintenant
-    (f o) *)
+
+let map f (c : t) =
+  (* retourne l'arbre dont les élément o de c sont maintenant (f o) *)
   (* applique la fonction f a tous les elements de la liste et les
      rajoute dans le nouvel arbre *)
   let add_f_all lst ntl = List.fold_left 
-    (fun acc x -> add (f x) depth acc) ntl lst in
+    (fun acc x -> add (f x) acc) ntl lst in
   let rec aux t nt =
     (* applique add_f_all a chaque element du noeud ou de la feuille
        est reitère avec les sous arbres *)
