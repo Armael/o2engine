@@ -1,10 +1,16 @@
 module O = Ball
+open Utils
 
-type t = O.t list
-let empty () = []
-let add o c = o::c
-let iter f (c:t) = List.iter f c
-let map f (c:t) = List.map f c
+type cont = O.t list
+type t = Vector.t * Vector.t * cont
+let empty v1 v2  = (v1, v2, [])
+let add o c = (fst3 c, snd3 c, o::(trd3 c))
+let iter f (c:t) = List.iter f (trd3 c)
+let map f (c:t) = (fst3 c, snd3 c, List.map f (trd3 c))
+
+let resize new_v1 new_v2 (v1, v2, l) =
+  (new_v1, new_v2,
+   List.filter (fun b -> Rect.is_in_rect_partial new_v1 new_v2 b) l)
 
 (* Pareil qu'avec un fold avec Ball.is_colliding, mais retourne (en
    utilisant en interne une exception) dès qu'une collision a été
@@ -44,5 +50,5 @@ let iterate_solve_collisions solver cont =
       let (p, u, n) = prev loc' in
       iterate (next (p, new_it, n)) in
   
-  if cont = [] then [] else
-    iterate (start_loc cont)
+  if trd3 cont = [] then cont else
+    (fst3 cont, snd3 cont, iterate (start_loc (trd3 cont)))

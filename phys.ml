@@ -1,11 +1,13 @@
 open Utils
 
 module type Container = sig
-  type t
-  val empty : unit -> t
+  type cont
+  type t = Vector.t * Vector.t * cont
+  val empty : Vector.t -> Vector.t -> t
   val add : Ball.t -> t -> t
   val iter : (Ball.t -> unit) -> t -> unit
   val map : (Ball.t -> Ball.t) -> t -> t
+  val resize : Vector.t -> Vector.t -> t -> t
   val iterate_solve_collisions : (Ball.t -> Ball.t -> Ball.t * Ball.t) -> t -> t
 end
 
@@ -46,8 +48,8 @@ struct
       (is_border_ok b Top w.borders.top) &&
       (is_border_ok b Bottom w.borders.bottom)
 
-  let new_world () = {
-    balls = C.empty ();
+  let new_world v1 v2 = {
+    balls = C.empty v1 v2;
     f = [];
     borders = {right = None;
 	       left = None;
@@ -57,6 +59,13 @@ struct
   }
 
   let iter f w = C.iter f w.balls
+
+  let resize new_v1 new_v2 w = 
+    let (v1, v2, _) = w.balls in
+    if new_v1 <> v1 || new_v2 <> v2 then
+      {w with balls = C.resize v1 v2 w.balls}
+    else
+      w
 
   let add_ball b w =
     let open Ball in

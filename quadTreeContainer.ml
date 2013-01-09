@@ -16,8 +16,8 @@ open Utils
  *)
 
 
-type tree = Void | Leaf of O.t list | Node of O.t list * t * t * t * t 
-and t = Vector.t * Vector.t * tree
+type cont = Void | Leaf of O.t list | Node of O.t list * t * t * t * t 
+and t = Vector.t * Vector.t * cont
 
 let log2 x = (log x) /. (log 2.)
 
@@ -188,6 +188,9 @@ let map f (c : t) =
       add_f_all lo ntr
   in
   aux c (empty (fst3 c) (snd3 c))
+
+let resize new_v1 new_v2 c =
+  map (fun x -> x) (new_v1, new_v2, trd3 c)
 
 exception Collides
 let is_colliding b cont =

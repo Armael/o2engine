@@ -4,8 +4,9 @@ module type PhysEngine = sig
   type border_type =
   Right | Left | Top | Bottom
   type world
-  val new_world : unit -> world
+  val new_world : Vector.t -> Vector.t -> world
   val iter : (Ball.t -> unit) -> world -> unit
+  val resize : Vector.t -> Vector.t -> world -> world
   val set_border : border_type -> float -> world -> world
   val unset_border : border_type -> world -> world
   val set_restitution : float -> world -> world
@@ -51,15 +52,25 @@ struct
   }
   
   type border_type = P.border_type
-  let new_world () = {
-    phys = P.new_world ();
-    buff = G.open_buffer ();
-    borders_follow_buff_size = false;
-    predraw_hook = [];
-    postdraw_hook = [];
-    predraw_hook_number = 0;
-    postdraw_hook_number = 0
- }
+
+  let buff_rect buff = 
+    let v1 = {Vector.x = 0.; Vector.y = 0.}
+    and v2 = {Vector.x = float buff.G.width;
+	      Vector.y = float buff.G.height} in
+    (v1, v2)
+
+  let new_world () = 
+    let buff = G.open_buffer () in
+    let (v1, v2) = buff_rect buff in
+    {
+      phys = P.new_world v1 v2;
+      buff = buff;
+      borders_follow_buff_size = false;
+      predraw_hook = [];
+      postdraw_hook = [];
+      predraw_hook_number = 0;
+      postdraw_hook_number = 0
+    }
   
   let set_border border_type value w = {w with phys = P.set_border border_type value w.phys}
   let unset_border border_type w = {w with phys = P.unset_border border_type w.phys}
@@ -96,6 +107,10 @@ struct
   let run fps world =
     let dt = 1. /. (float fps) in
 
+    let resize_world w =
+      let (v1, v2) = buff_rect w.buff in
+      {w with phys = P.resize v1 v2 w.phys} in
+
     let update_borders w = 
       let open G in
       G.update w.buff; 
@@ -113,6 +128,7 @@ struct
       (run_wait (fun () ->
 	w >>=
 	  update_borders >>= 
+	  resize_world >>=
 	  simulate dt >>=
 	  display) dt) >>=
 	loop dt in
