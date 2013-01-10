@@ -1,5 +1,5 @@
 (* Conteneur list : il s'agit d'une liste ainsi qu'un rectangle
-   définissant la zone qu'elle «contient" *)
+   définissant la zone qu'elle « contient » *)
 type cont = Ball.t list
 type t = Vector.t * Vector.t * cont
 
