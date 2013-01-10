@@ -1,4 +1,7 @@
-type t = Keypress of char | Button_up | Button_down | Slide of Vector.t * Vector.t
+open Utils
+
+type t = Keypress of char | Button_up | Button_down
+	 | Slide of Vector.t * Vector.t | Sliding of Vector.t * Vector.t
 type pos = Pos of int * int
 type status = ((t * pos) list)
 
@@ -9,19 +12,27 @@ let mouse_pos_memory = ref (Vector.create ())
 let get_status () =
   let button_get button_stat pos l =
     let aux button_stat pos l =
+      let open Vector in
       match button_stat <> !mouse_memory, button_stat with
-      | true, true -> mouse_pos_memory := {Vector.x = float_of_int (fst pos);
-					   Vector.y = float_of_int (snd pos)};
+      | true, true -> mouse_pos_memory := {x = float (fst pos);
+					   y = float (snd pos)};
       	(Button_up, Pos (fst pos,snd pos))::l
       | true, false -> 
-      	if ((!mouse_pos_memory).Vector.x <> (float_of_int (fst pos)) || 
-	       (!mouse_pos_memory).Vector.y <> (float_of_int (snd pos)))
+      	if ((!mouse_pos_memory).x <> (float (fst pos)) || 
+	       (!mouse_pos_memory).y <> (float (snd pos)))
       	then 
-      	  ((Slide (!mouse_pos_memory, {Vector.x = float_of_int (fst pos);
-				       Vector.y = float_of_int (snd pos)}), 
+      	  ((Slide (!mouse_pos_memory, {x = float (fst pos);
+				       y = float (snd pos)}), 
       	    Pos (fst pos,snd pos)))::
       	    (Button_down, Pos (fst pos,snd pos))::l
       	else (Button_down, Pos (fst pos,snd pos))::l
+      | false, true -> if ((!mouse_pos_memory).x <> (float (fst pos)) ||
+			      (!mouse_pos_memory).y <> (float (snd pos)))
+	then
+	  (Sliding (!mouse_pos_memory, {x = float (fst pos);
+					 y = float (snd pos)}),
+	   Pos (fst pos, snd pos))::l
+	else l
       | false, _ -> l
     in
     let res = aux button_stat pos l in

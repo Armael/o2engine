@@ -101,6 +101,7 @@ let () =
       | Keypress c -> Printf.printf "Keypress : %c" c; print_endline ""
       | Button_up -> Printf.printf "Button up"; print_endline ""
       | Slide(v1,v2)-> Printf.printf "Slide : (%f,%f)->(%f,%f)" v1.x v1.y v2.x v2.y; print_endline ""
+      | Sliding(v1, v2) -> Printf.printf "Sliding : (%f,%f) -> (%f,%f)\n%!" v1.x v1.y v2.x v2.y
       | Button_down -> Printf.printf "Button down"; print_endline "");
       ) status;
       w) >>=
