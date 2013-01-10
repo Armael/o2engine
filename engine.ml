@@ -57,7 +57,7 @@ struct
     fps : float Queue.t;
     user_action : Ui.status -> world -> world
   }
-  
+
   type border_type = P.border_type
 
   let buff_rect buff = 
@@ -88,7 +88,7 @@ struct
       postdraw_hook_number = 0;
       user_action = (fun _ w -> w)
     }
-  
+
   let set_border border_type value w = {w with phys = P.set_border border_type value w.phys}
   let unset_border border_type w = {w with phys = P.unset_border border_type w.phys}
   let set_restitution value w = {w with phys = P.set_restitution value w.phys}
@@ -104,9 +104,9 @@ struct
 			       {w with postdraw_hook = (w.postdraw_hook_number + 1, f)::w.postdraw_hook})
   let remove_hook i l = List.filter (fun (j, _) -> j = i) l
   let remove_predraw_hook i w =
-  {w with predraw_hook = remove_hook i w.predraw_hook}
+    {w with predraw_hook = remove_hook i w.predraw_hook}
   let remove_postdraw_hook i w =
-  {w with postdraw_hook = remove_hook i w.postdraw_hook}
+    {w with postdraw_hook = remove_hook i w.postdraw_hook}
 
 
   let set_user_action f w = {w with user_action = f}
@@ -132,7 +132,7 @@ struct
       ) w.phys;
       draw_fps buf;
       List.iter (fun c -> snd c buf) w.postdraw_hook;) w.buff;
-      w
+    w
       
   let run fps world =
     let dt = 1. /. (float fps) in
@@ -151,7 +151,7 @@ struct
 	  set_border P.Top (float w.buff.height) >>=
 	  set_border P.Bottom 0.
       else w
-      in
+    in
     let simulate dt w = {w with phys = P.simulate dt w.phys} in
 
     let run_wait_update_fps f dt =
@@ -172,8 +172,8 @@ struct
 	loop dt in
 
     loop dt world
-    
+      
   let user_map f w = 
-  {w with phys = P.map f w.phys}
+    {w with phys = P.map f w.phys}
 
 end
