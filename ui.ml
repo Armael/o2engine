@@ -19,7 +19,7 @@ let get_status () =
 
   let key_get key_stat key_char pos l=
     match key_stat with
-    |true -> ((Keypress key_char), pos)::l
+    |true -> ((Keypress (key_char())), pos)::l
     |false -> l
   in
 
@@ -31,13 +31,11 @@ let get_status () =
       let statbe = Graphics.wait_next_event [Graphics.Button_down;
 	   				     Graphics.Button_up; 
 	   				     Graphics.Poll] in 
-      let statke = Graphics.wait_next_event [Graphics.Key_pressed;
-	  				     Graphics.Poll] in
       let open Graphics in
       (button_get statbe.button 
 	 (Pos (statbe.mouse_x, statbe.mouse_y))
-	 (key_get statke.keypressed statke.key 
-	    (Pos (statke.mouse_x, statke.mouse_y))
-	    (get_event statke.keypressed (i-1)))) 
+	 (key_get (key_pressed()) read_key 
+	    (Pos ((fst (mouse_pos())), snd (mouse_pos())))
+	    (get_event (key_pressed()) (i-1)))) 
   in
   get_event true 5
