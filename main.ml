@@ -1,18 +1,19 @@
 open Utils
 open MainWindow
 
-module C = ListContainer
+module C = QuadTreeContainer
 module PhysEngine = Phys.Make (C)
 
 module Engine = Engine.Make (PhysEngine) (Screen)
 
-let rec add_random_balls xm ym n w =
+let rec add_random_balls size_min size_max speed_max xm ym n w =
+  let adr = add_random_balls size_min size_max speed_max xm ym in
   if n = 0 then w else (
-    let r = (Random.float 35.) +. 5. in
+    let r = (Random.float (size_max -. size_min)) +. size_min in
     let x = (Random.float (xm -. (2.*.r))) +. r in
     let y = (Random.float (ym -. (2.*.r))) +. r in
-    let vx = (if Random.bool () then 1. else -1.) *. (Random.float 500.) in
-    let vy = (if Random.bool () then 1. else -1.) *. (Random.float 500.) in
+    let vx = (if Random.bool () then 1. else -1.) *. (Random.float speed_max) in
+    let vy = (if Random.bool () then 1. else -1.) *. (Random.float speed_max) in
     let open Ball in
     let open Vector in
     let rand_ball = {
@@ -27,10 +28,9 @@ let rec add_random_balls xm ym n w =
     let open Engine in
     let open PhysEngine in
     if C.is_colliding rand_ball w.phys.balls then
-      add_random_balls xm ym n w
+      adr n w
     else (
-      add_random_balls xm ym (n-1) 
-	(Engine.add_ball rand_ball w)
+      adr (n-1) (Engine.add_ball rand_ball w)
     )
   )
 
@@ -97,8 +97,8 @@ let () =
   | 1 -> world >>=
     borders_follow_buffer_size true >>=
     add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
-    add_random_balls xm ym 70 >>= 
-    set_restitution 0.8 >>=
+    add_random_balls 5. 35. 400. xm ym 70 >>= 
+    set_restitution 0.9 >>=
     set_user_action (fun status w ->
       let open Ui in
       List.iter (fun (t, _) -> (match t with 
@@ -113,14 +113,12 @@ let () =
 
   | 2 -> world >>=
     borders_follow_buffer_size true >>=
-    add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
-    add_random_balls xm ym 70 >>= 
-    set_restitution 0.8 >>=
+    add_random_balls 2. 2. 500. xm ym 2000 >>= 
+    set_restitution 1. >>=
     run 60
 
   | _ -> world >>=
     borders_follow_buffer_size true >>=
-    add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
-    add_random_balls xm ym 70 >>= 
-    set_restitution 0.8 >>=
+    add_random_balls 10. 10. 300. xm ym 300 >>= 
+    set_restitution 1. >>=
     run 60
