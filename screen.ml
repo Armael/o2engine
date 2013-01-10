@@ -1,5 +1,7 @@
 (* Module abstrayant l'implémentation de la sortie graphique : ici, il
    s'agit de la sortie écran, implémentée grâce au module Graphics.
+   Il s'occupe également en interne du double-buffering, puisque
+   celui-ci est spécifique à l'implémentation.
 *)
 
 (* Informations privées *)
