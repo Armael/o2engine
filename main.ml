@@ -47,9 +47,6 @@ let () =
   let open Vector in
   match i with
   | 0 ->
-    (*let etape = ref false in
-    let posmem = ref(0,0) in*)
-
     let rec ballsWithCoordList l rad w = match l with
       | [] -> w
       | (x,y,i)::ll -> let newBall = Ball.create () in
