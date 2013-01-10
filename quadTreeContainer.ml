@@ -176,9 +176,8 @@ let map f (c : t) =
     (* applique add_f_all a chaque element du noeud ou de la feuille
        est reitère avec les sous arbres *)
     match t with
-    | (x, y, Void) -> nt
-    | (x, y, Leaf (b)) ->
-      (add_f_all b nt)
+    | (_, _, Void) -> nt
+    | (_, _, Leaf (b)) -> add_f_all b nt
     | (x, y, Node (lo, bl, br, tl, tr)) ->
       let nbl = (aux bl nt) in
       let nbr = (aux br nbl) in
