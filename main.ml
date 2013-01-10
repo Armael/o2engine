@@ -82,16 +82,16 @@ let () =
 	let n = Vector.norm b.speed in
 	if n > 0. then 
 	  (-. 200. *. (1. /. n)) ** b.speed
-	else {Vector.x = 0.; Vector.y = 0.}) >>=
+	else {x = 0.; y = 0.}) >>=
       set_restitution 0.99 >>=
       set_user_action (fun ui_state w ->
 	let w = set_postdraw_hook [] w in
 	List.fold_left (fun w (t, _) -> match t with
 	| Ui.Slide (v1, v2) -> modify_i 0
-	  (fun b -> {b with speed = Vector.scale (2.) (Vector.sub v2 v1)}) w
+	  (fun b -> {b with speed = (2.) ** (v2 -- v1)}) w
 	| Ui.Sliding (v1, v2) -> set_postdraw_hook
-	  [0, (fun buf -> Screen.moveto (int v1.x) (int v1.y) buf;
-	    Screen.lineto (int v2.x) (int v2.y) buf)] w
+	  [0, (fun buf -> moveto (int v1.x) (int v1.y) buf;
+	    lineto (int v2.x) (int v2.y) buf)] w
 	| _ -> w) w ui_state) >>=
       run 60
       
