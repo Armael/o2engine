@@ -39,7 +39,7 @@ let () =
   let open Engine in
   let i = openWindow () in
   
-  let world = Engine.new_world 600 600 in
+  let world = Engine.new_world 800 600 in
   Random.self_init ();
   let xm = float world.buff.width in
   let ym = float world.buff.height in 
