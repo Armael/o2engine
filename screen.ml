@@ -38,6 +38,9 @@ let rmoveto x y buf = Graphics.rmoveto x y
 let draw_rect x y w h buf = Graphics.draw_rect x y w h
 let fill_circle x y r buf = Graphics.fill_circle x y r
 
+let set_text_size n buf = Graphics.set_text_size n
+let draw_string x y s buf = Graphics.moveto x y; Graphics.draw_string s
+
 let draw f buf =
   f buf;
   if buf.priv.double_buffering then Graphics.synchronize ();
