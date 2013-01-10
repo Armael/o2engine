@@ -106,6 +106,7 @@ let () =
       List.iter (fun (t, _) -> (match t with 
       | Keypress c -> Printf.printf "Keypress : %c" c; print_endline ""
       | Button_up -> Printf.printf "Button up"; print_endline ""
+      | Slide(v1,v2)-> Printf.printf "Slide : (%f,%f)->(%f,%f)" v1.x v1.y v2.x v2.y; print_endline ""
       | Button_down -> Printf.printf "Button down"; print_endline "");
       ) status;
       w) >>=
