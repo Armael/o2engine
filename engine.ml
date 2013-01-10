@@ -109,7 +109,8 @@ struct
 
     let draw_fps buf =
       G.set_text_size 10 buf;
-      G.draw_string 10 10 (Printf.sprintf "%3.f FPS" fps_moy) buf in
+      G.draw_string (buf.G.width - 50) (buf.G.height - 20)
+	(Printf.sprintf "%3.f FPS" fps_moy) buf in
 
     let open Ball in
     let open Vector in
