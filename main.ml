@@ -101,6 +101,14 @@ let () =
     add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
     add_random_balls xm ym 70 >>= 
     set_restitution 0.8 >>=
+    set_user_action (fun status w ->
+      let open Ui in
+      List.iter (fun (t, _) -> (match t with 
+      | Keypress c -> Printf.printf "Keypress : %c" c; print_endline ""
+      | Button_up -> Printf.printf "Button up"; print_endline ""
+      | Button_down -> Printf.printf "Button down"; print_endline "");
+      ) status;
+      w) >>=
     run 60
 
   | 2 -> world >>=
