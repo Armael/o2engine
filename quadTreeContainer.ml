@@ -25,7 +25,7 @@ let get_depth v1 v2 =
   (* Retourne la profondeur adéquate pour avoir des feuilles d'environ
      size px de côté *)
   let open Vector in
-  let size = 30. in
+  let size = 50. in
   int_of_float (max (log2 ((v2.x -. v1.x) /. size)) (log2 ((v2.y -. v1.y) /. size)))
 
 let is_in_tree t ball =
