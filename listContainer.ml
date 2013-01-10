@@ -1,8 +1,8 @@
 module O = Ball
 open Utils
 
-(* Conteneur list : il s'agit d'une liste ainsi qu'un rectangle
-   définissant la zone qu'elle «contient" *)
+(*Conteneur list : il s'agit d'une liste ainsi qu'un rectangle
+   définissant la zone qu'elle «contient» *)
 type cont = O.t list
 type t = Vector.t * Vector.t * cont
 
