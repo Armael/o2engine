@@ -89,7 +89,7 @@ struct
   let resize new_v1 new_v2 w = 
     let (v1, v2, _) = w.balls in
     if new_v1 <> v1 || new_v2 <> v2 then
-      {w with balls = C.resize v1 v2 w.balls}
+      {w with balls = C.resize new_v1 new_v2 w.balls}
     else
       w
 
