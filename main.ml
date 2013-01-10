@@ -46,53 +46,7 @@ let () =
   let open Ball in
   let open Vector in
   match i with
-  | 0 ->
-    let rec ballsWithCoordList l rad w = match l with
-      | [] -> w
-      | (x,y,i)::ll -> let newBall = Ball.create () in
-		       ballsWithCoordList ll rad
-			 (add_ball {newBall with pos = {x = x; y = y};
-			   radius = rad; id = i;
-			   mass = 5.;
-			   color = (if i = 0 then Color.blue else Color.red)} w)
-    in
-
-    world >>=
-      borders_follow_buffer_size true >>=
-      ballsWithCoordList [(50., ym/.2., 0); (xm /. 2., ym /. 2., 1);
-			  ((xm /. 2.) +. 30., (ym /. 2.) +. 30., 1);
-			  ((xm /. 2.) +. 30., (ym /. 2.) -. 30., 1);
-			  (xm /. 2. +. 60., ym /. 2., 1);
-			  (xm /. 2. +. 60., ym /. 2. +. 60., 1);
-			  (xm /. 2. +. 60., ym /. 2. -. 60., 1); 
-			  (xm /. 2. +. 90., ym /. 2. -. 30., 1);
-			  (xm /. 2. +. 90., ym /. 2. -. 90., 1);
-			  (xm /. 2. +. 90., ym /. 2. +. 30., 1);
-			  (xm /. 2. +. 90., ym /. 2. +. 90., 1)] 20. >>=
-      (* Frottements fluides *)
-      add_f (fun b -> 
-	let open Ball in
-	(-. 0.001 *. (norm b.speed)) ** b.speed) >>=
-      (* Frottements solides *)
-      add_f (fun b ->
-	let open Ball in
-	let n = Vector.norm b.speed in
-	if n > 0. then 
-	  (-. 200. *. (1. /. n)) ** b.speed
-	else {x = 0.; y = 0.}) >>=
-      set_restitution 0.99 >>=
-      set_user_action (fun ui_state w ->
-	let w = set_postdraw_hook [] w in
-	List.fold_left (fun w (t, _) -> match t with
-	| Ui.Slide (v1, v2) -> modify_i 0
-	  (fun b -> {b with speed = (2.) ** (v2 -- v1)}) w
-	| Ui.Sliding (v1, v2) -> set_postdraw_hook
-	  [0, (fun buf -> moveto (int v1.x) (int v1.y) buf;
-	    lineto (int v2.x) (int v2.y) buf)] w
-	| _ -> w) w ui_state) >>=
-      run 60
-      
-  | 1 -> world >>=
+  | 0 -> world >>=
     borders_follow_buffer_size true >>=
     add_f (fun b -> b.mass ** {x = 0.; y = -1000.}) >>=
     add_random_balls 5. 35. 400. xm ym 70 >>= 
@@ -109,7 +63,7 @@ let () =
       w) >>=
     run 60
 
-  | 2 -> world >>=
+  | 1 -> world >>=
     borders_follow_buffer_size true >>=
     add_random_balls 2. 2. 500. xm ym 2000 >>= 
     set_restitution 1. >>=

@@ -64,7 +64,7 @@ let evenements objArray =
 
 let openWindow () =
   Graphics.open_graph " 200x100";
-  let boutons1 = doButton (5, 5) [|"billard";"angry birds";"test 1";"test 2"|] 0 false (fun () -> ()) in
+  let boutons1 = doButton (5, 5) [|"test 0";"test 1";"test 2"|] 0 false (fun () -> ()) in
   let objets = [|boutons1|] in
   evenements objets;
   Graphics.close_graph();
