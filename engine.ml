@@ -83,6 +83,7 @@ struct
   let borders_follow_buffer_size bool w = {w with borders_follow_buff_size = bool}
   let add_ball b w = {w with phys = P.add_ball b w.phys}
   let add_f f w = {w with phys = P.add_f f w.phys}
+
   let set_predraw_hook lf w = {w with predraw_hook = lf}
   let set_postdraw_hook lf w = {w with postdraw_hook = lf}
   let add_predraw_hook f w = (w.predraw_hook_number + 1, {w with predraw_hook = (w.predraw_hook_number + 1, f)::w.predraw_hook})
