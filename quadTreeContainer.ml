@@ -74,21 +74,21 @@ let add o c =
   let open Ball in
   let open Vector in
   let open Rect in
-  let rec constr o depth c =
+  let rec constr o depth c k =
     match c with
     | (vx, vy, Void) ->
       let blr = bl_rect vx vy and brr = br_rect vx vy and
 	  tlr = tl_rect vx vy and trr = tr_rect vx vy in
-      if (is_in_rect vx vy o) then
+      if (is_in_rect_partial vx vy o) then
 	(* Si o est dans le sous-arbre c *)
 	if (is_in_multiple_sub_rect vx vy o) then
-	  (vx, vy, Node ([o], (fst blr, snd blr, Void),
-			 (fst brr, snd brr, Void),
-			 (fst tlr, snd tlr, Void),
-			 (fst trr, snd trr, Void)))
+	  k (vx, vy, Node ([o], (fst blr, snd blr, Void),
+			   (fst brr, snd brr, Void),
+			   (fst tlr, snd tlr, Void),
+			   (fst trr, snd trr, Void)))
 	(* Si o est dans plusieurs sous-arbres on crée un noeud avec
 	   des sous-arbres vides et on l'ajoute au noeud *)
-	else if (depth = 0) then (vx, vy, Leaf ([o]))
+	else if (depth <= 0) then k (vx, vy, Leaf ([o]))
 	(* Si o est à la profondeur max on crée une feuille et on
 	   l'ajoute à la feuille *)
 	else constr o depth (vx, vy,
@@ -96,33 +96,31 @@ let add o c =
 				   (fst blr, snd blr, Void),
 				   (fst brr, snd brr, Void),
 				   (fst tlr, snd tlr, Void),
-				   (fst trr, snd trr, Void))
-	)
+				   (fst trr, snd trr, Void))) k
 	(* Si o est dans un unique sous-arbre on crée un noeud et on
 	   le rajoute aux sous-arbres *)
-	else c;	(* On retourne l'arbre courant si l'objet ne peut pas être ajouté *)
+	else k c;	(* On retourne l'arbre courant si l'objet ne peut pas être ajouté *)
 
     | (vx, vy, Leaf (l)) ->
-      if (is_in_rect vx vy o) then
-	(vx, vy, Leaf (o :: l))	(* On ajoute l'objet à la feuille (il est déja à la profondeur max) *)
+      if (is_in_rect_partial vx vy o) then
+	k (vx, vy, Leaf (o :: l))	(* On ajoute l'objet à la feuille (il est déja à la profondeur max) *)
       else
-	c	(* Retourne l'arbre courant si l'objet ne peut pas être ajouté *)
+	k c	(* Retourne l'arbre courant si l'objet ne peut pas être ajouté *)
     | (vx, vy, Node (lo, bl, br, tl, tr)) ->
-      if (is_in_rect vx vy o) then
+      if (is_in_rect_partial vx vy o) then
 	(* o est dans le sous-arbre *)
 	if (is_in_multiple_sub_rect vx vy o) then
 	  (* Si o est dans plusieurs sous-arbres on l'ajoute au nœud *)
-	  (vx, vy, Node (o :: lo, bl, br, tl, tr))
-	else
+	  k (vx, vy, Node (o :: lo, bl, br, tl, tr))
+	else 
 	  (* Sinon on le rajoute aux sous-arbres *)
-	  (vx, vy, Node (lo,
-			 constr o (depth - 1) bl,
-			 constr o (depth - 1) br,
-			 constr o (depth - 1) tl,
-			 constr o (depth - 1) tr
-	   ))
-      else c (* Retourne l'arbre courant si l'objet ne peut pas être ajouté *)
-  in constr o depth c
+	  (constr o (depth - 1) bl (fun v1 ->
+	    constr o (depth - 1) br (fun v2 ->
+	      constr o (depth - 1) tl (fun v3 ->
+		constr o (depth - 1) tr (fun v4 ->
+		  k (vx, vy, Node (lo, v1, v2, v3, v4)))))))
+      else k c (* Retourne l'arbre courant si l'objet ne peut pas être ajouté *)
+  in constr o depth c (fun x -> x)
 
 let remove o c =
   (* Retire un élément o dans un arbre c *)
