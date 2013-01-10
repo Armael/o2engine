@@ -25,7 +25,7 @@ module type GraphicEngine = sig
     mutable height : int;
     priv : t
   }
-  val open_buffer : unit -> buffer
+  val open_buffer : int -> int -> buffer
   val close_buffer : buffer -> unit
   val update : buffer -> unit
 
@@ -66,8 +66,8 @@ struct
 	      Vector.y = float buff.G.height} in
     (v1, v2)
 
-  let new_world () = 
-    let buff = G.open_buffer () in
+  let new_world width height = 
+    let buff = G.open_buffer width height in
     let (v1, v2) = buff_rect buff in
     {
       phys = P.new_world v1 v2;

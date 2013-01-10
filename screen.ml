@@ -16,7 +16,8 @@ type buffer = {
   priv : t
 }
 
-(* Crée un nouveau buffer d'affichage *)
+(* Crée un nouveau buffer d'affichage (n'est pas utilisé par
+   l'utilisateur du module) *)
 let create_buffer w h = {
   width = w;
   height = h;
@@ -25,8 +26,8 @@ let create_buffer w h = {
 }
 
 (* Ouvre le buffer d'affichage *)
-let open_buffer () =
-  Graphics.open_graph " ";
+let open_buffer width height =
+  Graphics.open_graph (Printf.sprintf " %dx%d" width height);
   let w = Graphics.size_x () and h = Graphics.size_y () in
   let buf = create_buffer w h in
   Graphics.auto_synchronize (not buf.priv.double_buffering);
