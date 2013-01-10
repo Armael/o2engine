@@ -10,26 +10,29 @@ let get_status () =
   let button_get button_stat pos l =
     let aux button_stat pos l =
       match button_stat <> !mouse_memory, button_stat with
-      |true, true -> mouse_pos_memory := {Vector.x = float_of_int (fst pos); Vector.y = float_of_int (snd pos)};
-      							  (Button_up, Pos (fst pos,snd pos))::l
-      |true, false -> 
-      									if ((!mouse_pos_memory).Vector.x <> (float_of_int (fst pos)) ||  (!mouse_pos_memory).Vector.y <> (float_of_int (snd pos)))
-      									then 
-      									((Slide (!mouse_pos_memory,{Vector.x = float_of_int (fst pos); Vector.y = float_of_int (snd pos)}), 
-      									Pos (fst pos,snd pos)))::
-      									(Button_down, Pos (fst pos,snd pos))::l
-      									else(Button_down, Pos (fst pos,snd pos))::l
-      |false, _ -> l
+      | true, true -> mouse_pos_memory := {Vector.x = float_of_int (fst pos);
+					   Vector.y = float_of_int (snd pos)};
+      	(Button_up, Pos (fst pos,snd pos))::l
+      | true, false -> 
+      	if ((!mouse_pos_memory).Vector.x <> (float_of_int (fst pos)) || 
+	       (!mouse_pos_memory).Vector.y <> (float_of_int (snd pos)))
+      	then 
+      	  ((Slide (!mouse_pos_memory, {Vector.x = float_of_int (fst pos);
+				       Vector.y = float_of_int (snd pos)}), 
+      	    Pos (fst pos,snd pos)))::
+      	    (Button_down, Pos (fst pos,snd pos))::l
+      	else (Button_down, Pos (fst pos,snd pos))::l
+      | false, _ -> l
     in
     let res = aux button_stat pos l in
     mouse_memory := button_stat;
     res
   in
 
-  let key_get key_stat key_char pos l=
+  let key_get key_stat key_char pos l =
     match key_stat with
-    |true -> ((Keypress (key_char())), Pos (fst pos,snd pos))::l
-    |false -> l
+    | true -> ((Keypress (key_char())), Pos (fst pos,snd pos))::l
+    | false -> l
   in
 
   let rec get_event b i =
