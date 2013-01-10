@@ -198,3 +198,168 @@ let is_colliding b cont =
       false with
       | Collides -> true
 
+(* Zipper sur les quad Trees : définition de l'« emplacement » dans un
+   qtree *)
+
+type parent_data = Vector.t * Vector.t * (Ball.t list)
+
+type cxt =
+| Top
+| BL of cxt * parent_data * t * t * t  (* bottom left branch *)
+| BR of cxt * parent_data * t * t * t  (* bottom right branch *)
+| TL of cxt * parent_data * t * t * t  (* top left branch *)
+| TR of cxt * parent_data * t * t * t  (* top right branch *)
+
+type location = t * cxt
+
+(* Fonctions permettant de se déplacer dans l'arbre, toutes de type
+   location -> location *)
+
+let bl (t, c) = match trd3 t with
+  | Void | Leaf _ -> failwith "bl"
+  | Node (ol, bl, br, tl, tr) -> (bl, BL (c,
+					  (fst3 t, snd3 t, ol),
+					  br, tl, tr))
+
+let br (t, c) = match trd3 t with
+  | Void | Leaf _ -> failwith "br"
+  | Node (ol, bl, br, tl, tr) -> (br, BR (c,
+					  (fst3 t, snd3 t, ol),
+					  bl, tl, tr))
+
+let tl (t, c) = match trd3 t with
+  | Void | Leaf _ -> failwith "tl"
+  | Node (ol, bl, br, tl, tr) -> (tl, TL (c,
+					  (fst3 t, snd3 t, ol),
+					  bl, br, tr))
+
+let tr (t, c) = match trd3 t with
+  | Void | Leaf _ -> failwith "tr"
+  | Node (ol, bl, br, tl, tr) -> (tr, TR (c,
+					  (fst3 t, snd3 t, ol),
+					  bl, br, tl))
+
+let top t = (t, Top)
+
+let up (t, c) = match c with
+  | Top -> failwith "up"
+  | BL (c', dat, br, tl, tr) -> ((fst3 dat, snd3 dat, 
+				  Node (trd3 dat, t, br, tl, tr)), c')
+  | BR (c', dat, bl, tl, tr) -> ((fst3 dat, snd3 dat,
+				  Node (trd3 dat, bl, t, tl, tr)), c')
+  | TL (c', dat, bl, br, tr) -> ((fst3 dat, snd3 dat,
+				  Node (trd3 dat, bl, br, t, tr)), c')
+  | TR (c', dat, bl, br, tl) -> ((fst3 dat, snd3 dat,
+				  Node (trd3 dat, bl, br, tl, t)), c')
+
+let rec upmost loc = 
+  try upmost (up loc) with
+    Failure _ -> loc
+
+let find b t =
+  let open Rect in
+  let is_in_rect (u, v) = is_in_rect u v b in
+  let rec aux ((v1, v2, t), c) = 
+    let loc = ((v1, v2, t), c) in
+    if not (is_in_rect (v1, v2)) then
+      failwith "find"
+    else match t with 
+    | Void | Leaf _ -> loc
+    | Node _ ->
+      if is_in_multiple_sub_rect v1 v2 b then
+	loc
+      else if is_in_rect (bl_rect v1 v2) then
+	aux (bl loc)
+      else if is_in_rect (br_rect v1 v2) then
+	aux (br loc)
+      else if is_in_rect (tl_rect v1 v2) then
+	aux (tl loc)
+      else 
+	aux (tr loc) in
+  aux (top t)
+
+(* Implémentation du parcours en profondeur grâce au zipper *)
+
+(* t -> location *)
+let start_loc t = top t
+
+(* location -> location : étape suivante pour le parcours. *)
+let rec next loc = 
+  try tl loc with
+    Failure _ -> go_up loc
+and go_up loc = match snd loc with
+  | Top -> failwith "next"
+  | TL _ -> next_tr (up loc)
+  | TR _ -> next_bl (up loc)
+  | BL _ -> next_br (up loc)
+  | BR _ -> go_up (up loc)
+and next_tr loc =
+  try tr loc with
+    Failure _ -> go_up loc
+and next_bl loc =
+  try bl loc with
+    Failure _ -> go_up loc
+and next_br loc =
+  try br loc with
+    Failure _ -> go_up loc
+
+(* Descend dans la branche BR le plus possible *)
+let rec end_br loc =
+  try end_br (br loc) with
+    Failure _ -> loc
+
+let end_loc t = end_br (top t)
+
+let rec prev loc = match snd loc with
+  | Top -> failwith "prev"
+  | TL _ -> up loc
+  | TR _ -> end_br (tl (up loc))
+  | BL _ -> end_br (tr (up loc))
+  | BR _ -> end_br (bl (up loc))
+
+let iterate_solve_collisions solver cont =
+  (* iterate: location -> t *)
+  let rec iterate loc =
+    (* solve_collision : O.t -> location -> O.t * location *)
+    let rec solve_collision it ((v1, v2, t), c) =
+      let loc = ((v1, v2, t), c) in
+      match t with
+      | Void -> (it, loc)
+      | Leaf l -> 
+	let solved = trd3 (ListContainer.iterate_solve_collisions solver (v1, v2, (it::l))) in
+	(List.hd solved, ((v1, v2, Leaf (List.tl solved)), c))
+      | Node (l, bl', br', tl', tr') ->
+	let it::solved_l = trd3 (ListContainer.iterate_solve_collisions solver (v1, v2, (it::l))) in
+	let new_loc = ((v1, v2, Node (solved_l, bl', br', tl', tr')), c) in
+	let (it, solved_bl) = solve_collision it (bl new_loc) in
+	let (it, solved_br) = solve_collision it (br (up solved_bl)) in
+	let (it, solved_tl) = solve_collision it (tl (up solved_br)) in
+	let (it, solved_tr) = solve_collision it (tr (up solved_tl)) in
+	(it, up solved_tr)
+    in
+
+    let ((v1, v2, t), c) = loc in
+    let new_loc =
+      (match t with
+      | Void -> loc
+      | Leaf balls ->
+	((v1, v2, 
+	  Leaf (trd3 (ListContainer.iterate_solve_collisions solver (v1, v2, balls)))), c)
+      | Node (l, bl', br', tl', tr') ->
+	let l = (trd3 (ListContainer.iterate_solve_collisions solver (v1, v2, l))) in
+	let new_loc = ((v1, v2, Node (l, bl', br', tl', tr')), c) in
+	let (new_loc, new_l) = List.fold_left (fun (new_loc, new_l) it ->
+	  let (new_it, n_loc) = solve_collision it (bl new_loc) in
+	  let (new_it, n_loc) = solve_collision new_it (br (up n_loc)) in
+	  let (new_it, n_loc) = solve_collision new_it (tl (up n_loc)) in
+	  let (new_it, n_loc) = solve_collision new_it (tr (up n_loc)) in
+	  (up n_loc, new_it::new_l)) (new_loc, []) l in
+	let ((_, _, Node (_, bl, br, tl, tr)), c) = new_loc in
+	let loc = ((v1, v2, Node (new_l, bl, br, tl, tr)), c) in
+	loc) in
+
+    try iterate (next new_loc) with
+    | Failure _ -> fst (upmost new_loc)
+  in
+  iterate (start_loc cont)
+
