@@ -8,6 +8,7 @@ all: native
 
 native:
 	$(CC) $(CFLAGS) main.$@
+	$(CC) $(CFLAGS) missilecommand.$@
 
 byte:
 	$(CC) $(CFLAGS) main.$@

@@ -27,7 +27,7 @@ let handle_event event_hand =
   let res = 
   (aux status.keypressed event_hand.keypress_handler status.key,
    aux (!mouse_memory = status.button) event_hand.button_handler status.button,
-   Some (event_hand.pos_handler (status.mouse_x, status.mouse_y))) in
+   (event_hand.pos_handler (status.mouse_x, status.mouse_y))) in
 
 mouse_memory := status.button;
 res
