@@ -34,9 +34,9 @@ let get_status () =
 	  				     Graphics.Poll] in
       let open Graphics in
       (button_get statbe.button 
-	 (statbe.mouse_x,statbe.mouse_y)
+	 (Pos (statbe.mouse_x, statbe.mouse_y))
 	 (key_get statke.keypressed statke.key 
-	    (statke.mouse_x,statke.mouse_y)
+	    (Pos (statke.mouse_x, statke.mouse_y))
 	    (get_event statke.keypressed))) 
   in
   get_event true
