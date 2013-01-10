@@ -326,10 +326,12 @@ let iterate_solve_collisions solver cont =
       match t with
       | Void -> (it, loc)
       | Leaf l -> 
-	let solved = trd3 (ListContainer.iterate_solve_collisions solver (v1, v2, (it::l))) in
+	let solved = trd3 (ListContainer.iterate_solve_collisions solver
+			     (v1, v2, (it::l))) in
 	(List.hd solved, ((v1, v2, Leaf (List.tl solved)), c))
       | Node (l, bl', br', tl', tr') ->
-	let it::solved_l = trd3 (ListContainer.iterate_solve_collisions solver (v1, v2, (it::l))) in
+	let it::solved_l = trd3 (ListContainer.iterate_solve_collisions solver
+				   (v1, v2, (it::l))) in
 	let new_loc = ((v1, v2, Node (solved_l, bl', br', tl', tr')), c) in
 	let (it, solved_bl) = solve_collision it (bl new_loc) in
 	let (it, solved_br) = solve_collision it (br (up solved_bl)) in
@@ -344,9 +346,11 @@ let iterate_solve_collisions solver cont =
       | Void -> loc
       | Leaf balls ->
 	((v1, v2, 
-	  Leaf (trd3 (ListContainer.iterate_solve_collisions solver (v1, v2, balls)))), c)
+	  Leaf (trd3 (ListContainer.iterate_solve_collisions solver
+			(v1, v2, balls)))), c)
       | Node (l, bl', br', tl', tr') ->
-	let l = (trd3 (ListContainer.iterate_solve_collisions solver (v1, v2, l))) in
+	let l = (trd3 (ListContainer.iterate_solve_collisions solver
+			 (v1, v2, l))) in
 	let new_loc = ((v1, v2, Node (l, bl', br', tl', tr')), c) in
 	let (new_loc, new_l) = List.fold_left (fun (new_loc, new_l) it ->
 	  let (new_it, n_loc) = solve_collision it (bl new_loc) in
