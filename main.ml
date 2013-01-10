@@ -47,8 +47,8 @@ let () =
   let open Vector in
   match i with
   | 0 ->
-    let etape = ref false in
-    let posmem = ref(0,0) in
+    (*let etape = ref false in
+    let posmem = ref(0,0) in*)
 
     let rec ballsWithCoordList l rad w=
       match l with
@@ -67,7 +67,7 @@ let () =
 			   color = Color.red} w)
     in
     world >>=
-      set_world_keypress_handler (fun c -> ()) >>=
+      (*set_world_keypress_handler (fun c -> ()) >>=
       set_world_button_handler (fun b -> b) >>=
       set_world_pos_handler (fun (i,j) -> (i,j)) >>=
       set_predraw_hook 
@@ -76,7 +76,6 @@ let () =
    	  match a, b, p, !etape with
    	  | Some (), _, _, _ -> w
    	  | _, Some true, Some(i, j), false ->
-   	    print_int 5;
    	    etape := true; 
    	    posmem := (i,j);
    	    w;
@@ -88,7 +87,7 @@ let () =
 				       y = float_of_int (snd (!posmem) - j)}}
    		| _ -> b) w
    	  | _, _, _, _ -> w))
-      ] >>=
+      ] >>=*)
       borders_follow_buffer_size true >>=
       ballsWithCoordList [(50.,ym/.2.,0);(xm/.2. ,ym/.2.,1);((xm/.2.) +. 30.,(ym/.2.) +. 30.,1);
 			  ((xm/.2.) +. 30.,(ym/.2.) -. 30.,1);(xm/.2. +. 60. ,ym/.2.,1);(xm/.2. +. 60. ,ym/.2.+. 60.,1);
