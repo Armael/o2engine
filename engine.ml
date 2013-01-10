@@ -66,9 +66,17 @@ struct
 	      Vector.y = float buff.G.height} in
     (v1, v2)
 
+  (* Étend le rectangle (v1, v2) pour laisser des marges de <margin> px de
+     chaque côté *)
+  let extend (v1, v2) =
+    let margin = 50. in
+    let open Vector in
+    ({x = v1.x -. margin; y = v1.y -. margin},
+     {x = v2.x +. margin; y = v2.y +. margin})
+
   let new_world width height = 
     let buff = G.open_buffer width height in
-    let (v1, v2) = buff_rect buff in
+    let (v1, v2) = extend (buff_rect buff) in
     {
       phys = P.new_world v1 v2;
       buff = buff;
@@ -130,7 +138,7 @@ struct
     let dt = 1. /. (float fps) in
 
     let resize_world w =
-      let (v1, v2) = buff_rect w.buff in
+      let (v1, v2) = extend (buff_rect w.buff) in
       {w with phys = P.resize v1 v2 w.phys} in
 
     let update_borders w = 
@@ -157,9 +165,9 @@ struct
       (run_wait_update_fps (fun () ->
 	w >>=
 	  update_borders >>=
-	  resize_world >>=
 	  simulate dt >>=
 	  w.user_action (Ui.get_status ()) >>=
+	  resize_world >>=
 	  display) dt) >>=
 	loop dt in
 
