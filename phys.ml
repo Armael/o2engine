@@ -1,5 +1,16 @@
+(* Module Phys : ce module fournit un foncteur Make, prenant en
+   argument un module décrivant un conteneur de balles (de signature
+   Container), et renvoie un module décrivant un moteur physique,
+   embarquant un monde contenant les objets physique, les forces
+   s'appliquant dessus, et des fonctions permettant de le simuler en
+   tenant compte des collisions
+*)
+
+
 open Utils
 
+(* La signature d'un conteneur de balles que prendra en argument le
+   foncteur Make *)
 module type Container = sig
   type cont
   type t = Vector.t * Vector.t * cont
@@ -11,9 +22,13 @@ module type Container = sig
   val iterate_solve_collisions : (Ball.t -> Ball.t -> Ball.t * Ball.t) -> t -> t
 end
 
+(* Foncteur Make : il prend en argument un module décrivant un
+   conteneur de balles, et renvoie un module décrivant un moteur
+   physique *)
 module Make = 
   functor (C : Container) ->
 struct
+  (* On peut définir des bordures physiques pour le monde *)
   type borders = {
     right : float option;
     left : float option;
@@ -22,8 +37,11 @@ struct
   }
 
   type border_type = 
-  Right | Left | Top | Bottom
+    Right | Left | Top | Bottom
 
+  (* Type décrivant un « monde physique » : contient les balles, les
+     bordures, les forces, le coefficient de restitution pour les
+     chocs *)
   type world = {
     balls : C.t;
     f : (Ball.t -> Vector.t) list;
@@ -31,6 +49,7 @@ struct
     restitution : float
   }
 
+  (* Teste si la balle b n'est pas en dehors pour la bordure b_type *)
   let is_border_ok b b_type = 
     let open Ball in
     let open Vector in
@@ -42,12 +61,14 @@ struct
       | Top -> b.pos.y +. b.radius <= f
       | Bottom -> b.pos.y -. b.radius >= f)
 
+  (* Teste si la balle b est bien à l'intérieur des bordures *)
   let is_in b w = 
     (is_border_ok b Right w.borders.right) &&
       (is_border_ok b Left w.borders.left) &&
       (is_border_ok b Top w.borders.top) &&
       (is_border_ok b Bottom w.borders.bottom)
 
+  (* Retourne un nouveau monde vide *)
   let new_world v1 v2 = {
     balls = C.empty v1 v2;
     f = [];
@@ -58,8 +79,13 @@ struct
     restitution = 1.
   }
 
+  (* Permet d'itérer sur les balles du monde *)
   let iter f w = C.iter f w.balls
 
+  (* Redimensionne le conteneur de balles pour lui donner la taille du
+     rectangle défini par new_v1, new_v2 (coin inférieur gauche, coin
+     supérieur droit).  Doit être appelée lorsque le buffer graphique
+     change de taille *)
   let resize new_v1 new_v2 w = 
     let (v1, v2, _) = w.balls in
     if new_v1 <> v1 || new_v2 <> v2 then
@@ -67,6 +93,7 @@ struct
     else
       w
 
+  (* Ajoute un balle au monde *)
   let add_ball b w =
     let open Ball in
     if is_in b w then
@@ -76,11 +103,13 @@ struct
     else 
       w
 
+  (* Ajoute une force *)
   let add_f f w =
     { w with
       f = f::w.f
     }
 
+  (* Fixe la bordure border_type à la valeur value *)
   let set_border border_type value w = 
     let b = (
       match border_type with
@@ -91,6 +120,7 @@ struct
     ) in
     {w with borders = b}
 
+  (* Supprime une bordure (border_type) *)
   let unset_border border_type w = 
     let b = (
       match border_type with
@@ -101,9 +131,13 @@ struct
     ) in
     {w with borders = b}
 
+  (* Fixe le coefficient de restitution pour les chocs *)
   let set_restitution value w =
     { w with restitution = value}
 
+  (* Fonction prenant deux balles en argument, supposées étant en
+     collision, et retourne les deux balles après la résolution de la
+     collision *)
   let b2b_collision_solver w b1 b2 =
     let open Ball in
     let open Vector in
@@ -126,6 +160,7 @@ struct
       let b2 = {b2 with speed = b2.speed -- (im2 ** impulse)} in
       (b1, b2)
 
+  (* Résout les collisions des balles avec les murs *)
   let solve_wall_collisions w =
     {w with balls =
 	C.map (fun b ->

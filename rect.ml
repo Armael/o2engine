@@ -1,5 +1,10 @@
+(* Module de manipulation de « rectangles » : un rectangle est la
+   donnée d'un couple de vecteurs (v1, v2), v1 correspondant aux
+   coordonnées du coin inférieur gauche, v2 les coordonnées du coin
+   supérieur droit *)
+
 let is_in_rect v1 v2 ball = 
-   (* Retourne true si le centre de ball est dans le rectangle défini par v1 et v2 *) 
+  (* Retourne true si le centre de ball est dans le rectangle défini par v1 et v2 *) 
   let open Ball in
   let open Vector in
   (ball.pos.x >= v1.x
@@ -27,22 +32,26 @@ let is_in_rect_partial v1 v2 ball =
 let moy a b = (a +. b) /. 2.
 
 let bl_rect v1 v2 =
+  (* Retourne le sous-rectangle inférieur gauche de (v1, v2) *)
   let open Vector in
   (v1, 
    {x = moy v1.x v2.x;
     y = moy v1.y v2.y})
 
 let br_rect v1 v2 =
+  (* Retourne le sous-rectangle inférieur droit de (v1, v2) *)
   let open Vector in
   ({v1 with x = moy v1.x v2.x},
    {v2 with y = moy v1.y v2.y})
 
 let tl_rect v1 v2 =
+  (* Retourne le sous-rectangle supérieur gauche de (v1, v2) *)
   let open Vector in
   ({v1 with y = moy v1.y v2.y},
    {v2 with x = moy v1.x v2.x})
 
 let tr_rect v1 v2 =
+  (* Retourne le sous-rectangle supérieur droit de (v1, v2) *)
   let open Vector in
   ({x = moy v1.x v2.x; 
     y = moy v1.y v2.y},

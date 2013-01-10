@@ -24,6 +24,7 @@ let print b = Printf.printf "{id:%d; pos:" b.id;
   V.print b.speed;
   Printf.printf "; radius: %f, mass: %f}" b.radius b.mass
 
+(* Teste si deux balles sont entrées en collision *)
 let is_colliding b1 b2 =
   let delta = V.sub b1.pos b2.pos in
   (V.sp delta delta) <= (b1.radius +. b2.radius) ** 2.

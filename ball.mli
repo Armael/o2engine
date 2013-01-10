@@ -8,5 +8,7 @@ type t = {
 }
 
 val create : unit -> t
-val is_colliding : t -> t -> bool
 val print : t -> unit
+
+(* Teste si deux balles sont entrées en collision *)
+val is_colliding : t -> t -> bool
