@@ -58,6 +58,8 @@ let moveto x y buf = Graphics.moveto x y
 let rmoveto x y buf = Graphics.rmoveto x y
 let draw_rect x y w h buf = Graphics.draw_rect x y w h
 let fill_circle x y r buf = Graphics.fill_circle x y r
+let lineto x y buf = Graphics.lineto x y
+let rlineto x y buf = Graphics.rlineto x y
 
 let set_text_size n buf = Graphics.set_text_size n
 let draw_string x y s buf = Graphics.moveto x y; Graphics.draw_string s
