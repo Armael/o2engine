@@ -86,9 +86,11 @@ struct
 
   let set_predraw_hook lf w = {w with predraw_hook = lf}
   let set_postdraw_hook lf w = {w with postdraw_hook = lf}
-  let add_predraw_hook f w = (w.predraw_hook_number + 1, {w with predraw_hook = (w.predraw_hook_number + 1, f)::w.predraw_hook})
-  let add_postdraw_hook f w = (w.postdraw_hook_number + 1, {w with postdraw_hook = (w.postdraw_hook_number + 1, f)::w.postdraw_hook})
-  	let remove_hook i l = List.filter (fun (j,_) -> j = i) l
+  let add_predraw_hook f w = (w.predraw_hook_number + 1,
+			      {w with predraw_hook = (w.predraw_hook_number + 1, f)::w.predraw_hook})
+  let add_postdraw_hook f w = (w.postdraw_hook_number + 1,
+			       {w with postdraw_hook = (w.postdraw_hook_number + 1, f)::w.postdraw_hook})
+  let remove_hook i l = List.filter (fun (j, _) -> j = i) l
   let remove_predraw_hook i w =
   {w with predraw_hook = remove_hook i w.predraw_hook}
   let remove_postdraw_hook i w =
