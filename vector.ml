@@ -1,3 +1,5 @@
+(* Module de manipulation de vecteurs *)
+
 type t = { x : float; y : float }
 
 let pi = 3.1415926535897932

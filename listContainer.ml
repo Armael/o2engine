@@ -1,13 +1,22 @@
 module O = Ball
 open Utils
 
+(* Conteneur list : il s'agit d'une liste ainsi qu'un rectangle
+   définissant la zone qu'elle «contient" *)
 type cont = O.t list
 type t = Vector.t * Vector.t * cont
+
+(* Retourne un conteneur vide de taille (v1, v2) *)
 let empty v1 v2  = (v1, v2, [])
+(* Ajoute une balle au conteneur *)
 let add o c = (fst3 c, snd3 c, o::(trd3 c))
+(* Itère f sur le conteneur *)
 let iter f (c:t) = List.iter f (trd3 c)
+(* Applique f à chaque élément du conteneur *)
 let map f (c:t) = (fst3 c, snd3 c, List.map f (trd3 c))
 
+(* Redimensionne le rectangle du conteneur et supprime les balles en
+   dehors *)
 let resize new_v1 new_v2 (v1, v2, l) =
   (new_v1, new_v2,
    List.filter (fun b -> Rect.is_in_rect_partial new_v1 new_v2 b) l)
@@ -23,14 +32,28 @@ let is_colliding b cont =
       false with
   | Collides -> true
 
+(* Implémentation d'un Zipper sur les listes, permettant de parcourir
+   pas à pas et « modifier » au cours du parcours la structure de
+   données, et ce de manière purement fonctionnelle *)
+
+(* Emplacement dans la liste au cours du parcours : l'emplacement du 3
+   dans la liste [1;2;3;4;5] correspond à ([2;1]; 3; [4; 5]) *)
 type 'a loc = 'a list * 'a * 'a list
 
+(* Emplacement initial *)
 let start_loc l = ([], List.hd l, List.tl l)
+(* Parcours de la liste : avance d'un élément *)
 let next (prev, it, next) = (it::prev, List.hd next, List.tl next)
+(* Recule d'un élément *)
 let prev (prev, it, next) = (List.tl prev, List.hd prev, it::next)
+(* Retourne la position finale : pour [1;2;3;4;5] il s'agit de
+   ([1;2;3;4], 5, []) *)
 let end_loc l = let r = List.rev l in
-	    (List.tl r, List.hd r, [])
+		(List.tl r, List.hd r, [])
 
+(* Itère sur la structure de données, et résout les collisions des
+   balles deux à deux : la fonction solver passée en argument retourne
+   deux balles modifiées après une collision *)
 let iterate_solve_collisions solver cont =
   (* iterate: O.t loc -> O.t list *)
   let rec iterate (p, it, n) =
