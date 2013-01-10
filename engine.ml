@@ -54,6 +54,7 @@ struct
     postdraw_hook : (int * (G.buffer -> unit)) list;
     predraw_hook_number : int;
     postdraw_hook_number : int;
+    fps : float Queue.t;
     user_action : Ui.status -> world -> world
   }
   
@@ -72,6 +73,7 @@ struct
       phys = P.new_world v1 v2;
       buff = buff;
       borders_follow_buff_size = false;
+      fps = Queue.create ();
       predraw_hook = [];
       postdraw_hook = [];
       predraw_hook_number = 0;
@@ -102,6 +104,13 @@ struct
   let set_user_action f w = {w with user_action = f}
 
   let display w =
+    let (nb, sum) = Queue.fold (fun (nb, sum) x -> (nb+.1., sum+.x)) (0., 0.) w.fps in
+    let fps_moy = sum /. nb in
+
+    let draw_fps buf =
+      G.set_text_size 10 buf;
+      G.draw_string 10 10 (Printf.sprintf "%3.f FPS" fps_moy) buf in
+
     let open Ball in
     let open Vector in
     G.draw (fun buf ->
@@ -112,6 +121,7 @@ struct
 	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
 	G.set_color Color.black buf
       ) w.phys;
+      draw_fps buf;
       List.iter (fun c -> snd c buf) w.postdraw_hook;) w.buff;
       w
       
@@ -135,10 +145,17 @@ struct
       in
     let simulate dt w = {w with phys = P.simulate dt w.phys} in
 
+    let run_wait_update_fps f dt =
+      let (delay, res) = run_wait f dt in
+      let cur_fps = 1. /. delay in
+      if not (Queue.is_empty res.fps) then
+	ignore (Queue.pop res.fps);
+      Queue.push cur_fps res.fps; res in
+
     let rec loop dt w =
-      (run_wait (fun () ->
+      (run_wait_update_fps (fun () ->
 	w >>=
-	  update_borders >>= 
+	  update_borders >>=
 	  resize_world >>=
 	  simulate dt >>=
 	  w.user_action (Ui.get_status ()) >>=

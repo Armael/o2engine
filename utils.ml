@@ -28,10 +28,10 @@ let rec sleep t =
     sleep (t -. ((Unix.gettimeofday ()) -. now))
 
 (* Exécute la fonction f : unit -> 'a, attend le temps t, *en prenant
-   en compte le temps d'exécution de la fonction*, et renvoie la
-   valeur de retour de f *)
+   en compte le temps d'exécution de la fonction*, et renvoie le couple
+   (temps attendu, valeur de retour de f) *)
 let run_wait f t =
   let start = Unix.gettimeofday () in
   let ret = f () in
   sleep (t -. (Unix.gettimeofday ()) +. start);
-  ret
+  (Unix.gettimeofday () -. start, ret)
