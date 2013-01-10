@@ -54,6 +54,7 @@ struct
     postdraw_hook : (int * (G.buffer -> unit)) list;
     predraw_hook_number : int;
     postdraw_hook_number : int;
+    user_action : Ui.status -> world -> world
   }
   
   type border_type = P.border_type
@@ -75,6 +76,7 @@ struct
       postdraw_hook = [];
       predraw_hook_number = 0;
       postdraw_hook_number = 0;
+      user_action = (fun _ w -> w)
     }
   
   let set_border border_type value w = {w with phys = P.set_border border_type value w.phys}
@@ -96,6 +98,8 @@ struct
   let remove_postdraw_hook i w =
   {w with postdraw_hook = remove_hook i w.postdraw_hook}
 
+
+  let set_user_action f w = {w with user_action = f}
 
   let display w =
     let open Ball in
@@ -137,6 +141,7 @@ struct
 	  update_borders >>= 
 	  resize_world >>=
 	  simulate dt >>=
+	  w.user_action (Ui.get_status ()) >>=
 	  display) dt) >>=
 	loop dt in
 
