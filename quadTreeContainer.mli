@@ -6,6 +6,8 @@ val remove : Ball.t -> t -> t
 val iter : (Ball.t -> unit) -> t -> unit
 val map : (Ball.t -> Ball.t) -> t -> t
 val resize : Vector.t -> Vector.t -> t -> t
+val modify : Ball.t -> Ball.t -> t -> t
+val modify_i : int -> (Ball.t -> Ball.t) -> t -> t
 
 val is_colliding : Ball.t -> t -> bool
 

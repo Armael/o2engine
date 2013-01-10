@@ -9,6 +9,8 @@ module type PhysEngine = sig
   val iter : (Ball.t -> unit) -> world -> unit
   val resize : Vector.t -> Vector.t -> world -> world
   val map : (Ball.t -> Ball.t) -> world -> world
+  val modify : Ball.t -> Ball.t -> world -> world
+  val modify_i : int -> (Ball.t -> Ball.t) -> world -> world
 
   val set_border : border_type -> float -> world -> world
   val unset_border : border_type -> world -> world
@@ -88,6 +90,11 @@ struct
       postdraw_hook_number = 0;
       user_action = (fun _ w -> w)
     }
+
+  let map f w = {w with phys = P.map f w.phys}
+  let iter f w = P.iter f w.phys
+  let modify b b' w = {w with phys = P.modify b b' w.phys}
+  let modify_i i f w = {w with phys = P.modify_i i f w.phys}
 
   let set_border border_type value w = {w with phys = P.set_border border_type value w.phys}
   let unset_border border_type w = {w with phys = P.unset_border border_type w.phys}
@@ -173,7 +180,4 @@ struct
 
     loop dt world
       
-  let user_map f w = 
-    {w with phys = P.map f w.phys}
-
 end

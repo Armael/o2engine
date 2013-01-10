@@ -12,6 +12,9 @@ val iter : (Ball.t -> unit) -> t -> unit
 (* Applique f à chaque élément du conteneur *)
 val map : (Ball.t -> Ball.t) -> t -> t
 
+val modify : Ball.t -> Ball.t -> t -> t
+val modify_i : int -> (Ball.t -> Ball.t) -> t -> t
+
 (* Redimensionne le rectangle du conteneur et supprime les balles en
    dehors *)
 val resize : Vector.t -> Vector.t -> t -> t

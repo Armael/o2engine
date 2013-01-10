@@ -18,6 +18,8 @@ module type Container = sig
   val add : Ball.t -> t -> t
   val iter : (Ball.t -> unit) -> t -> unit
   val map : (Ball.t -> Ball.t) -> t -> t
+  val modify : Ball.t -> Ball.t -> t -> t
+  val modify_i : int -> (Ball.t -> Ball.t) -> t -> t
   val resize : Vector.t -> Vector.t -> t -> t
   val iterate_solve_collisions : (Ball.t -> Ball.t -> Ball.t * Ball.t) -> t -> t
 end
@@ -81,6 +83,11 @@ struct
 
   (* Permet d'itérer sur les balles du monde *)
   let iter f w = C.iter f w.balls
+
+  let map f w = {w with balls = C.map f w.balls}
+
+  let modify b b' w = {w with balls = C.modify b b' w.balls}
+  let modify_i i f w = {w with balls = C.modify_i i f w.balls}
 
   (* Redimensionne le conteneur de balles pour lui donner la taille du
      rectangle défini par new_v1, new_v2 (coin inférieur gauche, coin
@@ -225,6 +232,4 @@ struct
     {w with balls =
 	C.iterate_solve_collisions (b2b_collision_solver w) (simulate_nc dt w).balls}
 	
-	let map f w = {w with balls = C.map f w.balls}
-
 end

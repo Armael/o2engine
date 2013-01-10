@@ -15,6 +15,16 @@ let iter f (c:t) = List.iter f (trd3 c)
 (* Applique f à chaque élément du conteneur *)
 let map f (c:t) = (fst3 c, snd3 c, List.map f (trd3 c))
 
+let modify b new_b (c:t) =
+   map (fun b' -> if b' = b then new_b else b') c
+
+let modify_i i f (c:t) =
+   map (fun b -> if b.Ball.id = i then f b else b) c
+
+let remove b c =
+  (fst3 c, snd3 c,
+   List.filter ((<>) b) (trd3 c))
+
 (* Redimensionne le rectangle du conteneur et supprime les balles en
    dehors *)
 let resize new_v1 new_v2 (v1, v2, l) =

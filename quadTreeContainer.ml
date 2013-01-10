@@ -187,6 +187,14 @@ let map f (c : t) =
   in
   aux c (empty (fst3 c) (snd3 c))
 
+let modify b new_b c =
+  c >>=
+    remove b >>=
+    add new_b
+
+let modify_i i f c =
+  map (fun b -> if b.Ball.id = i then f b else b) c
+
 let resize new_v1 new_v2 c =
   map (fun x -> x) (new_v1, new_v2, trd3 c)
 
