@@ -87,7 +87,8 @@ let () =
       set_user_action (fun ui_state w ->
 	let w = set_postdraw_hook [] w in
 	List.fold_left (fun w (t, _) -> match t with
-	| Ui.Slide (v1, v2) -> modify_i 0 (fun b -> {b with speed = Vector.sub v2 v1}) w
+	| Ui.Slide (v1, v2) -> modify_i 0
+	  (fun b -> {b with speed = Vector.scale (2.) (Vector.sub v2 v1)}) w
 	| Ui.Sliding (v1, v2) -> set_postdraw_hook
 	  [0, (fun buf -> Screen.moveto (int v1.x) (int v1.y) buf;
 	    Screen.lineto (int v2.x) (int v2.y) buf)] w
