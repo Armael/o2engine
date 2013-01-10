@@ -7,7 +7,7 @@ let mouse_memory = ref false
 let get_status () =
   let button_get button_stat pos l =
     let aux button_stat pos l =
-      match button_stat = !mouse_memory, button_stat with
+      match button_stat <> !mouse_memory, button_stat with
       |true, true -> (Button_up, pos)::l
       |true, false -> (Button_down, pos)::l
       |false, _ -> l
@@ -23,10 +23,11 @@ let get_status () =
     |false -> l
   in
 
-  let rec get_event b =
-    match b with 
-    |false -> []
-    |true ->
+  let rec get_event b i =
+    match b, i with 
+    | (false, _) -> []
+    | (_, 0) -> []
+    | (true, _) ->
       let statbe = Graphics.wait_next_event [Graphics.Button_down;
 	   				     Graphics.Button_up; 
 	   				     Graphics.Poll] in 
@@ -37,6 +38,6 @@ let get_status () =
 	 (Pos (statbe.mouse_x, statbe.mouse_y))
 	 (key_get statke.keypressed statke.key 
 	    (Pos (statke.mouse_x, statke.mouse_y))
-	    (get_event statke.keypressed))) 
+	    (get_event statke.keypressed (i-1)))) 
   in
-  get_event true
+  get_event true 5
