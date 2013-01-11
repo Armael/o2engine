@@ -163,6 +163,16 @@ Existent également les hooks :
   modifier le monde à volonté
 \end{itemize}
 
+\subsection{Historique des collisions}
+Toujours dans l'objectif de pouvoir utiliser le moteur à notre guise,
+est fourni un historique des collisions via une file (utilisant le
+module \texttt{Queue} de la bibliothèque standard OCaml). Ceci permet
+à l'utilisateur du moteur de réagir éventuellement en cas de
+collision, s'il veut agir sur les balles en question. C'est par
+exemple utilisé dans \texttt{missileCommand} pour éliminer les
+astéroïdes touchant le sol, et pour compter les points lorsque l'on
+touche un astéroïde.
+
 \subsection{Gestion de l'entrée utilisateur}
 Nous avons également besoin de gérer les entrées utilisateur : on veut
 pouvoir réagir quand l'utilisateur appuie sur une touche, clique sur
