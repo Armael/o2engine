@@ -44,6 +44,18 @@ let draw_background buf =
   G.set_color Color.black buf;
   G.lineto width lim_ground buf
 
+let draw_object b buf =
+  let open Ball in
+  let open Vector in
+  if b.id = 1 then
+    Asteroid.draw_asteroid b buf
+  else if b.id = 2 then
+    BigAsteroid.draw_asteroid b buf
+  else (
+    G.set_color b.color buf;
+    G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf
+  )
+
 let new_missile () =
   let open Vector in
   let open Ball in
@@ -52,10 +64,13 @@ let new_missile () =
   let speed_norm = 150. in
   let vx = Random.float (float width) -. x in
   let speed = speed_norm ** (unit {x = vx; y = -. (abs_float ((Random.float 5. +. 0.5) *. vx))}) in
+  let ast_type = if Random.int 3 = 1 then 1 else 2 in
+  let radius = if ast_type = 1 then 15. else 27. in
+  let mass = if ast_type = 1 then 5. else 10. in
   {pos = {x = x; y = y};
    speed = speed;
-   radius = 18.; id = 1;
-   mass = 5.; color = Color.rgb 95 95 95}
+   radius = radius; id = ast_type;
+   mass = mass; color = Color.black}
 
 let rec read_action l w =
   let open Engine in
@@ -118,4 +133,5 @@ let () =
       ) else read_action uia w
     ) >>= 
     set_predraw_hooks (fun m -> IMap.add 0 draw_background m) >>=
+    set_ball_hook draw_object >>=
     run 60
