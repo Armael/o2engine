@@ -133,7 +133,8 @@ struct
       P.iter (fun b ->
 	G.set_color b.color buf;
 	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
-	G.set_color Color.black buf
+	G.set_color Color.black buf;
+	G.draw_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf
       ) w.phys;
       draw_fps buf;
       IMap.iter (fun _ f -> f buf) w.postdraw_hooks) w.buff;
