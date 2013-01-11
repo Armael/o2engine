@@ -4,7 +4,8 @@ open Ui
 module C = QuadTreeContainer
 module PhysEngine = Phys.Make (C)
 
-module Engine = Engine.Make (PhysEngine) (Screen)
+module G = (Screen)
+module Engine = Engine.Make (PhysEngine) (G)
 
 let next_missile_delay = ref 100
 let defense_ball_exist = ref false
@@ -27,9 +28,9 @@ let draw_gradient v1 v2 color1 color2 buf =
     let c = Color.rgb (int (float r1 +. (float i) *. r_incr))
       (int (float g1 +. (float i) *. g_incr))
       (int (float b1 +. (float i) *. b_incr)) in
-    Screen.set_color c buf;
-    Screen.moveto (int left) (int bottom + i) buf;
-    Screen.lineto (int right) (int bottom + i) buf
+    G.set_color c buf;
+    G.moveto (int left) (int bottom + i) buf;
+    G.lineto (int right) (int bottom + i) buf
   done    
 
 let draw_background buf =
@@ -39,9 +40,9 @@ let draw_background buf =
     (Color.rgb 28 13 13) (Color.rgb 91 50 45) buf;
   draw_gradient {x = 0.; y = float lim_ground} {x = float width; y = float height}
     (Color.rgb 183 196 218) (Color.rgb 85 114 168) buf;
-  Screen.moveto 0 lim_ground buf;
-  Screen.set_color Color.black buf;
-  Screen.lineto width lim_ground buf
+  G.moveto 0 lim_ground buf;
+  G.set_color Color.black buf;
+  G.lineto width lim_ground buf
 
 let new_missile () =
   let open Vector in
@@ -95,7 +96,7 @@ let rec read_action l w =
     read_action ll w
 
 let () =
-  let open Screen in
+  let open G in
   let open Engine in  
 
   let world = Engine.new_world width height in
