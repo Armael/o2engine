@@ -24,8 +24,51 @@
 \section{Philosophie de développement et organisation du code}
 \paragraph{Un moteur purement fonctionnel}
 
-[comment ça marche ? on a des fonctions world -> world et avec >>= on
-a une syntaxe cool]
+Avec OCaml nous avons un langage fonctionnel de par son héritage et sa
+conception, mais embarquant également des constructions non
+fonctionnelles (références, champs mutables, …). Comme il est peu
+courant de voir des jeux et ce qui s'y rapporte (moteur de jeu, moteur
+physique) codés dans des langages fonctionnels (en général c'est
+plutôt du C++ utilisant massivement le paradigme objet), nous avons
+choisi d'implémenter le moteur de jeu, le moteur physique et les
+structures sous-jacentes de manière purement fonctionnelle, et en
+utilisant les idiomatismes Caml que sont les modules pour structurer
+notre projet.
+
+En pratique, comment réaliser ce qui semble intuitif avec des éléments
+mutables («~on fait bouger la boule~» devient «~on modifie ses
+coordonnées qui sont des champs mutables~») en n'utilisant que des
+structures non mutables ?
+
+Notre code sera en fait composé de structures (non-mutables, donc)
+décrivant un monde (monde d'objets physiques par exemple). Les
+fonctions agissant sur ce monde n'auront d'autre possibilité que d'en
+retourner un nouveau : on aura des fonctions qui, après application
+partielle, seront de type \texttt{world -> world}. Alors, il suffit
+d'enchainer l'application de ces fonctions à partir d'un
+\texttt{world} fraichement créé.
+
+Pour exprimer joliment (sans trop de parenthèses partout) un tel
+enchainement de «~modificateurs~», avec aussi une petite «~saveur~»
+impérative, nous avons massivement utilisé l'opérateur \texttt{>>=}
+défini comme suit :
+\begin{verbatim}
+let ( >>= ) w f = f w
+\end{verbatim}
+
+Celà semble idiot, mais ça nous permet d'enchainer très simplement des
+«~effets fonctionnels~» sur une structure. Pour ajouter une balle puis
+une force, on fera par exemple :
+\begin{verbatim}
+new_world () >>=
+  add_ball x y radius >>=
+  add_f gravity
+\end{verbatim}
+
+Les fonctions \texttt{add\_ball} et \texttt{add\_f} prennent un
+\texttt{world} en argument et en retournent un autre, mais sa
+propagation est cachée par l'opérateur.
+
 \paragraph{Les modules pour hiérarchiser, organiser le code et
   abstraire les implémentations}
 \begin{figure}[h]
