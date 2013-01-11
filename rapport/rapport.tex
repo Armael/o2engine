@@ -156,40 +156,41 @@ performances.
   pour stocker nos balles}
 
 Les quadTree sont une structure arborescente dont les nœuds possèdent
-chacun 4 sous-arbre, ces sous-arbres représentent le découpage du plan
-en quatre parties, la partie en haut à gauche, en bas à droite,
-etc. Ainsi en décomposant un plan en quatre parties et en plaçant
-chacun de ces élément dans une de ces sous-partie nous permet
-d'optimiser la gestion des collisions, en effet les boules se trouvant
-dans un sous-arbre ne peuvent, en théorie, être en collision avec les
-boules d'un des trois autre sous-arbre nous limitant ainsi les calculs
-à effectuer.
+chacun 4 sous-arbres, ces sous-arbres représentant le découpage du
+plan en quatre parties : la partie en haut à gauche, en bas à droite,
+etc. Ainsi, décomposer un plan en quatre parties et en plaçant chacun
+de ces éléments dans une de ces sous-parties nous permet d'optimiser
+la gestion des collisions. En effet, les boules se trouvant dans un
+sous-arbre ne peuvent, en théorie, être en collision avec les boules
+d'un des trois autre sous-arbres, nous limitant ainsi les calculs à
+effectuer.
 
 Cependant lorsque nous avons des boules de tailles différentes, et
 surtout quand la différence des tailles est grande, ce principe doit
-être adapté car les boules de grande tailles peuvent dépasser de leur
-domaine.  Il s'offrait plusieurs solutions à nous, soit nous ne
+être adapté car les boules de grande taille peuvent dépasser de leur
+domaine. Il s'offrait à nous plusieurs solutions : soit nous ne
 considérions que les centre des boules et adaptions la gestion des
 collision en fonction du rayon de la boule, soit nous découpions la
-boule en plusieurs partie pour la placer dans plusieurs feuilles et
+boule en plusieurs parties pour la placer dans plusieurs feuilles et
 faisions en sorte d'éviter de faire un calcul pour gérer le collision
 entre la même boule mais situé dans plusieurs feuilles.
 
-Trouvant ces méthodes peut satisfaisantes, par exemple pour dans le
-cas de la duplication des balles lors d'un dépassement de domaine peut
-conduire a un arbre très grand contenant beaucoup plus d'éléments que
-le nombre total de boules réduisant ainsi grandement la performance du
-quadTree, nous avons opter pour un quadTree a plusieurs niveau. C'est
-à dire que chaque nœud de l'arbre va contenir une liste, peut-être
-vide, de balles, ces balles sont celles qui ne peuvent pas être
-placées dans un unique sous-arbre. De ce fait les balles dont le rayon
-est important se trouvera peu profond dans l'arbre tandis que les
-balle dont le rayon est petit se trouveront généralement dans les
-nœuds les plus profonds de l'arbre. Par conséquent une balles pourra
-entrer en collision avec les balles qui sont dans le même nœud
-qu'elle, dans les nœuds de ses sous-arbres, et dans les nœuds de ses
-pères. Ceci nous permet d'avoir un bon compromis entre l'optimisation
-et la gestion des problématiques liées à la structure de quadTree.
+Trouvant ces méthodes peut satisfaisantes, par exemple, le cas de la
+duplication des balles lors d'un dépassement de domaine peut conduire
+a un arbre très grand, contenant beaucoup plus d'éléments que le
+nombre total de boules et réduisant ainsi grandement la performance du
+quadTree. Nous avons finalement opté pour un quadTree a plusieurs
+niveaux. C'est à dire que chaque nœud de l'arbre va contenir une
+liste, peut-être vide, de balles, ces balles sont celles qui ne
+peuvent pas être placées dans un unique sous-arbre. De ce fait, les
+balles dont le rayon est important se trouveront peu profond dans
+l'arbre tandis que les balles dont le rayon est petit se trouveront
+généralement dans les nœuds les plus profonds de l'arbre. Par
+conséquent une balle ne pourra entrer en collision qu'avec les balles
+qui sont dans le même nœud qu'elle, dans les nœuds de ses sous-arbres,
+et dans les nœuds de ses pères. Ceci nous permet d'avoir un bon
+compromis entre l'optimisation et la gestion des problématiques liées
+à la structure de quadTree.
 
 Théoriquement, dans la majeur partie des cas, avec cette structure
 nous avons une meilleure complexité qu'avec l'utilisation des listes
