@@ -242,12 +242,39 @@ ayant une grande liberté sur les manipulations que l'on peut faire, et
 ce sans perte notable de performances.
 
 \section{Simulation physique : module \texttt{Phys}}
-[module Phys obtenu comme image du foncteur Phys.Make sur un module
-conteneur]
+On parle en fait ici du module \texttt{Phys} comme image du foncteur
+\texttt{Phys.Make} sur un module conteneur.
+
+Ce module réalise un moteur physique 2D : il gère un monde d'objets
+physiques, et simule leur évolution au cours du temps.
 \subsection{Monde physique, objets physique : simulation simple sans
   collisions}
+Tout d'abord, considérons un monde sans collisions. Notre module
+\texttt{Phys} gère des balles, des bordures, et des forces.
+
+Tout ceci est stocké dans le monde que manipulent les fonctions de
+\texttt{Phys}, et est rentré par l'utilisateur : l'utilisateur du
+module choisit quelles balles il veut ajouter, quelles bordures il
+veut mettre, et fournit des fonctions de type \texttt{Ball.t ->
+  Vector.t} décrivant les forces. 
+
+Le module \texttt{Phys} est ainsi le plus général possible.
+
+Pour simuler tout ceci sans collisions, ce n'est pas très compliqué :
+en discrétisant le principe fondamental de la dynamique, pour une
+balle $b$, son évolution pendant un instant $dt$, et pour chaque force
+$f$ donne :
+\[
+v_b = v_b + dt \times \frac{f}{m}
+\]\[
+b_x = b_x + {v_x}_b \times dt
+\]\[
+b_y = b_y + {v_y}_b \times dt 
+\]
+
 \subsection{Gestion des collisions}
 \paragraph{Un peu de physique}
+
 \paragraph{En pratique}
 \subsection{Ce que nous permettrait également notre monde purement
   fonctionnel}
