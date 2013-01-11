@@ -71,14 +71,57 @@ propagation est cachée par l'opérateur.
 
 \paragraph{Les modules pour hiérarchiser, organiser le code et
   abstraire les implémentations}
+
+La structure du code a été dirigée par la volonté d'écrire du code le
+plus généraliste possible, composé d'unités les plus indépendantes
+possible les unes des autres.
+
+Nous avons utilisé pour celà le système de modules d'OCaml. Il nous
+permet ainsi , si nous avons besoin d'une unité réalisant certaines
+fonctions, de définir sa signature (le type de ce qu'il y aura dedans
+et les fonctions qu'elle fournit). Ensuite, on est libre d'implémenter
+effectivement la signature, d'une ou plusieurs manières. On est ainsi
+certain que les spécificités de l'implémentation ne se mélangeront pas
+avec l'utilisation qui en est faite dans le module qui a besoin des
+fonctionnalités.
+
+Par exemple, le moteur physique utilise un module définissant un
+conteneur d'objets. La signature d'un tel conteneur abstrait le type
+(on n'y a pas accès de l'extérieur), et définit des opérations :
+itérer sur la structure, ajouter / supprimer des éléments.
+
+Il définit ensuite un \emph{foncteur} : un \emph{foncteur} est aux
+modules ce qu'une fonction est aux valeurs OCaml : un foncteur prend
+un ou plusieurs modules en argument et retourne un autre module.
+
+Le foncteur en question, une fois qu'on lui a passé un module
+définissant un conteneur, retourne un module décrivant un moteur
+physique utilisant ce type de conteneur.
+
 \begin{figure}[h]
   \centering
   \includegraphics[scale = 0.7]{modules.eps}  
   \caption{Architecture des modules composant le projet}
+  Les doubles flèches désignent l'argument d'un foncteur, les triples
+  flèches la valeur de retour
   \label{fig:modules}
 \end{figure}
 
+Notre projet se structure ainsi par le bied de modules et foncteurs
+OCaml. Sur la figure, certains modules ne sont pas reliés : il s'agit
+de modules très généralistes qui sont en fait utilisés par à peu près
+tous les autres modules (il serait illisible de les relier à tout le
+monde).
+
 \paragraph{Un moteur généraliste et réutilisable}
+
+Notre moteur se veut par généraliste et réutilisable : il définit un
+ensemble de modules, qui s'utilisent finalement comme une bibliothèque
+externe.
+
+Ainsi, il peut être exporté sans aucune modification pour une autre
+utilisation, et peut être utilisé pour réaliser diverses programmes,
+comme le montre la section \ref{applications}.
 
 \section*{}
 À présent, il est temps de regarder de plus près les implémentations
@@ -251,6 +294,7 @@ dessin et nos \emph{hooks} éventuels, puis de lancer la simulation.
 
 
 \section{Application : on utilise notre moteur}
+\label{applications}
 
 \subsection{Quelques situations d'exemple}
 
