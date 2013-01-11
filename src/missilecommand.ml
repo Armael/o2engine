@@ -199,32 +199,39 @@ let () =
       				|(_,0)->score := !score  + 50
       				|_->()
       			done;
-      	while not (Queue.is_empty borders_log) do
+      while not (Queue.is_empty borders_log) do
       	let (b,a) = Queue.pop borders_log in
 			match b.id with
 						|0->()
 			      	|_->
-			      	if b.pos.x >= 122. && b.pos.x <= 620. then life := !life - b.id
+			      	if b.pos.x >= 122. && b.pos.x <= 620. then 
+			      	(
+			      	life := !life - b.id;
+			      	)
 			  done;
-      
       defense_ball_exist := false;
       iter (fun b -> defense_ball_exist := !defense_ball_exist || (b.id = 0)) w;
       next_asteroid_delay := !next_asteroid_delay - 1;
+      
       if !next_asteroid_delay = 0 then (
       if !nb_astroid_until_next_level = 0 then(
       nb_astroid_until_next_level := 8;
       level := min(!level + 1) 13);
+      
   nb_astroid_until_next_level := !nb_astroid_until_next_level - 1;
 	next_asteroid_delay := 100 - (5 * !level);
-	(add_ball (new_missile ()) w) >>=
-	  read_action uia;
+		(add_ball (new_missile ()) w)>>= 
+		map (fun b ->if ((b.radius +. b.pos.y -. 30. -. 10. <= 0.) && (b.speed.y > 0.) && (b.id <> 0)) then 
+      {b with pos = {x = -1000. ;y = -1000.}} else b) >>=
+	   read_action uia;
       )else 
       (
       if !life <= 0 then
       (
       main_world()
       )
-      else read_action uia w;
+      else (map (fun b ->if ((b.pos.y -. b.radius -. 30. -. 10. <= 0.) && (b.speed.y > 0.) && (b.id <> 0)) then 
+      {b with pos = {x = -1000. ;y = -1000.}} else b) w)>>= read_action uia;
       )
     )>>= 
     set_predraw_hooks (fun m -> IMap.add 0 draw_background m) >>=
