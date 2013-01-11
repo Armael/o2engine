@@ -130,8 +130,16 @@ fonctionnelles, simulation physique et gestion des collisions.
 
 \section{Containers de balles : les modules \texttt{ListContainer}
   et \texttt{QuadTreeContainer}}
-\subsection{Structures de données fonctionnelles et \emph{Zippers}}
 \subsection{\texttt{ListContainer} : conteneurs utilisant des listes}
+
+Lorsqu'il s'agit de stockée des données dans une structure de donnée permettant d'avoir toutes les données pour la restitution du monde. Il est aussi nécessaire d'avoir des fonctions associé à cette structure de donnée permettant une certaine interaction avec les éléments de ce monde, par exemple ajouter ou retirer un élément, actualiser l'élément
+
+C'est pourquoi la première idée est de stocker  ces élément dans une liste. Cette première structure est assez simple à mettre en œuvre et ne génère pas de cas problématiques particuliers. les fonctions sont déjà définies mais dans notre cas il est nécessaire de légèrement les modifier pour avoir une structure modulaire. 
+Il nous faut prendre en compte aussi la taille du monde c'est pourquoi au lieu d'avoir un type list tout simplement on a un type Vector * Vector * list.
+
+Toutefois, bien que simple a mettre en place elle est très peu optimisée. C'est pourquoi nous allons voir une structure différente, plus complexe mais qui nous permettra d'avoir de meilleures performances.
+
+
 \subsection{\texttt{QuadTreeContainer} : une structure arborescente
   pour stocker nos balles}
 
@@ -143,6 +151,9 @@ Il s'offrait plusieurs solutions à nous, soit nous ne considérions que les cen
 Trouvant ces méthodes peut satisfaisantes, par exemple pour dans le cas de la duplication des balles lors d'un dépassement de domaine peut conduire a un arbre très grand contenant beaucoup plus d'éléments que le nombre total de boules réduisant ainsi grandement la performance du quadTree, nous avons opter pour un quadTree a plusieurs niveau. C'est à dire que chaque nœud de l'arbre va contenir une liste, peut-être vide, de balles, ces balles sont celles qui ne peuvent pas être placées dans un unique sous-arbre. De ce fait les balles dont le rayon est important se trouvera peu profond dans l'arbre tandis que les balle dont le rayon est petit se trouveront généralement dans les nœuds les plus profonds de l'arbre. Par conséquent une balles pourra entrer en collision avec les balles qui sont dans le même nœud qu'elle, dans les nœuds de ses sous-arbres, et dans les nœuds de ses pères. Ceci nous permet d'avoir un bon compromis entre l'optimisation et la gestion des problématiques liées à la structure de quadTree.
 
 Théoriquement, dans la majeur partie des cas, avec cette structure nous avons une meilleure complexité qu'avec l'utilisation des listes et dans certain cas particulier nécessitant un fort concours de circonstance une complexité équivalente avec celle des listes. Les quadTree nous permettent dans l'absolu d'avoir une complexité logarithmique au lieu d'une complexité linéaire avec les listes.
+
+\subsection{Structures de données fonctionnelles et \emph{Zippers}}
+
 
 \section{Simulation physique : module \texttt{Phys}}
 [module Phys obtenu comme image du foncteur Phys.Make sur un module
@@ -175,8 +186,6 @@ l'écran qu'intervient...
 [ce qu'on appelle moteur de jeu est en réalité un module gérant tout
 ce qui touche à la physique, l'affichage, et qui permet à
 l'utilisateur de programmer aisément des situations variées]
-
-
 
 Le module Engine est le module avec lequel traitera au final
 l'utilisateur : il doit principalement permettre de simuler la
