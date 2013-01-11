@@ -113,8 +113,72 @@ taille de l'écran et des informations spécifiques à l'implémentations
 (cachées dans un type abstrait par la signature), comme le
 \emph{double buffering} (activé).
 
-\subsection{Que fait exactement \texttt{Engine} ?}
-\texttt{Engine}
+Connaitre la taille du buffer d'affichage est notamment important pour
+les modules «~au dessus~», utilisant ce module ci : par exemple, le
+module \texttt{Engine} en fait usage pour synchroniser (si l'option
+\texttt{borders\_follow\_buffer\_size} est à \texttt{true}) les bordures
+physiques avec la taille de l'écran, ce qui permet de pousser les
+boules en modifiant la taille de la fenêtre \footnote{On peut
+  notamment faire ceci dans les exemples du programme \texttt{main}}
 
+\subsection{Que fait exactement \texttt{Engine} ?}
+\texttt{Engine} fait la liaison entre la simulation et l'affichage :
+il fournit tout d'abord son propre monde (\texttt{Engine.world}),
+servant de surcouche au module gérant la physique.
+
+Par ailleurs, il fournit 
+\begin{itemize}
+\item Une fonction \texttt{draw} permettant de dessiner les objets
+  physiques sur l'écran
+\item Une fonction \texttt{run} permettant de «~faire tourner~» le
+  programme, une fois que l'on a ajouté ce qu'il faut au monde, en
+  affichant au nombre d'images par seconde désiré son évolution
+\end{itemize}
+
+\subsection{Le système de \emph{hooks}}
+Avec seulement ceci, la personnalisation serait un peu pauvre : on
+pourrait ajouter diverses balles, des forces, mais ensuite il ne
+serait possible que de regarder leur évolution sans pouvoir
+intervenir.
+
+Pour pouvoir intervenir aisément, et simuler tout type de
+comportements, nous avons mis en place un système de \emph{hooks} : le
+module \texttt{Engine} permet à l'utilisateur de donner au module des
+fonctions que le module exécutera à un moment précis.
+
+Par exemple, \texttt{Engine} fournit des \texttt{predraw\_hooks} :
+l'utilisateur indique un ensemble de fonctions d'affichage qu'il veut
+voir exécutées avant le dessin des boules, lui permettant d'afficher
+par exemple un fond personnalisé \footnote{Ceci est utilisé notamment
+  dans les programmes \texttt{billard} et \texttt{missileCommand}}.
+Existent également les hooks :
+\begin{itemize}
+\item \texttt{postdraw\_hooks} : fonctions d'affichage à exécuter à la fin
+\item \texttt{ball\_hook} : permet de définir une fonction
+  personnalisée pour afficher les balles \footnote{Utilisé dans
+    \texttt{billard} pour ajouter un cercle autour des boules, et bien
+    entendu dans \texttt{missileCommand} pour dessiner les astéroïdes}
+\item \texttt{user\_action} : un hook très important : il est appelé
+  dans la boucle principale (tous les \emph{dt} donc) et permet de
+  modifier le monde à volonté
+\end{itemize}
+
+\subsection{Gestion de l'entrée utilisateur}
+Nous avons également besoin de gérer les entrées utilisateur : on veut
+pouvoir réagir quand l'utilisateur appuie sur une touche, clique sur
+un bouton de la souris ou encore effectue un \emph{slide} (un
+cliqué-glissé).
+
+C'est à nouveau le module \texttt{Graphics} qui nous permet
+d'implémenter ceci, mais comme à notre habitude on va abstraire ceci
+dans un module : \texttt{Ui}.
+
+Celui-ci va nous fournir, lors de l'appel à la fonction
+\texttt{get\_status}, une liste des évènements apparus depuis le
+dernier appel : appui sur un bouton, cliqué-glissé, etc.
+
+C'est le module \texttt{Engine} qui va ensuite utiliser ce module, et
+passera au \emph{hook} \texttt{user\_action} la liste des évènements
+apparus.
 
 \end{document}
