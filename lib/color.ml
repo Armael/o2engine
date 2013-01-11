@@ -15,3 +15,8 @@ let magenta = Graphics.magenta
 (* Renvoie une couleur de composantes RGB les trois entiers (entre 0
    et 255) passés en argument *)
 let rgb = Graphics.rgb
+
+(* Renvoie le triplet (r, g, b) des composantes de la couleur *)
+let get_rgb color = ((color lsr 16) land 0xFF,
+		     (color lsr 8) land 0xFF,
+		     (color land 0xFF))

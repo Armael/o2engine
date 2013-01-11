@@ -15,3 +15,6 @@ val magenta : t
 (* Renvoie une couleur de composantes RGB les trois entiers (entre 0
    et 255) passés en argument *)
 val rgb : int -> int -> int -> t
+
+(* Renvoie le triplet (r, g, b) des composantes de la couleur *)
+val get_rgb : t -> int * int * int
