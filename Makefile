@@ -5,17 +5,16 @@ CFLAGS := -libs $(LIBS)
 
 .PHONY: all mproper
 
-all: native
+all: main billard missilecommand
 
-native:
-	$(CC) $(CFLAGS) $(SRC)/main.$@
-	$(CC) $(CFLAGS) $(SRC)/missilecommand.$@
-	$(CC) $(CFLAGS) $(SRC)/billard.$@
+main:
+	$(CC) $(CFLAGS) $(SRC)/$@.native
 
-byte:
-	$(CC) $(CFLAGS) $(SRC)/main.$@
-	$(CC) $(CFLAGS) $(SRC)/missilecommand.$@
-	$(CC) $(CFLAGS) $(SRC)/billard.$@
+billard:
+	$(CC) $(CFLAGS) $(SRC)/$@.native
+
+missilecommand:
+	$(CC) $(CFLAGS) $(SRC)/$@.native
 
 mproper:
 	$(CC) -clean
