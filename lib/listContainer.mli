@@ -12,6 +12,10 @@ val iter : (Ball.t -> unit) -> t -> unit
 (* Applique f à chaque élément du conteneur *)
 val map : (Ball.t -> Ball.t) -> t -> t
 
+(*retire une balle du conteneur*)
+val remove : Ball.t -> t -> t
+
+
 val modify : Ball.t -> Ball.t -> t -> t
 val modify_i : int -> (Ball.t -> Ball.t) -> t -> t
 
