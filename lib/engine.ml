@@ -1,5 +1,4 @@
 open Utils
-open Event
 
 module type PhysEngine = sig
   type border_type =
