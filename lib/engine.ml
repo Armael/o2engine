@@ -45,18 +45,25 @@ module type GraphicEngine = sig
   val draw : (buffer -> unit) -> buffer -> unit
 end
 
+module Int = struct
+  type t = int
+  let compare = compare
+end
+
+
 module Make =
   functor (P : PhysEngine) ->
     functor (G : GraphicEngine) ->
 struct
+
+  module IMap = Map.Make (Int)
+
   type world = {
     phys : P.world;
     buff : G.buffer;
     borders_follow_buff_size : bool;
-    predraw_hook  : (int * (G.buffer -> unit)) list;
-    postdraw_hook : (int * (G.buffer -> unit)) list;
-    predraw_hook_number : int;
-    postdraw_hook_number : int;
+    predraw_hooks : (G.buffer -> unit) IMap.t;
+    postdraw_hooks : (G.buffer -> unit) IMap.t;
     fps : float Queue.t;
     user_action : Ui.status -> world -> world
   }
@@ -85,10 +92,8 @@ struct
       buff = buff;
       borders_follow_buff_size = false;
       fps = Queue.create ();
-      predraw_hook = [];
-      postdraw_hook = [];
-      predraw_hook_number = 0;
-      postdraw_hook_number = 0;
+      predraw_hooks = IMap.empty;
+      postdraw_hooks = IMap.empty;
       user_action = (fun _ w -> w)
     }
 
@@ -104,18 +109,8 @@ struct
   let add_ball b w = {w with phys = P.add_ball b w.phys}
   let add_f f w = {w with phys = P.add_f f w.phys}
 
-  let set_predraw_hook lf w = {w with predraw_hook = lf}
-  let set_postdraw_hook lf w = {w with postdraw_hook = lf}
-  let add_predraw_hook f w = (w.predraw_hook_number + 1,
-			      {w with predraw_hook = (w.predraw_hook_number + 1, f)::w.predraw_hook})
-  let add_postdraw_hook f w = (w.postdraw_hook_number + 1,
-			       {w with postdraw_hook = (w.postdraw_hook_number + 1, f)::w.postdraw_hook})
-  let remove_hook i l = List.filter (fun (j, _) -> j = i) l
-  let remove_predraw_hook i w =
-    {w with predraw_hook = remove_hook i w.predraw_hook}
-  let remove_postdraw_hook i w =
-    {w with postdraw_hook = remove_hook i w.postdraw_hook}
-
+  let set_predraw_hooks f w = {w with predraw_hooks = f w.predraw_hooks}
+  let set_postdraw_hooks f w = {w with postdraw_hooks = f w.postdraw_hooks}
 
   let set_user_action f w = {w with user_action = f}
 
@@ -132,14 +127,14 @@ struct
     let open Vector in
     G.draw (fun buf ->
       G.clear buf;
-      List.iter (fun c -> snd c buf) w.predraw_hook;
+      IMap.iter (fun _ f -> f buf) w.predraw_hooks;
       P.iter (fun b ->
 	G.set_color b.color buf;
 	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
 	G.set_color Color.black buf
       ) w.phys;
       draw_fps buf;
-      List.iter (fun c -> snd c buf) w.postdraw_hook;) w.buff;
+      IMap.iter (fun _ f -> f buf) w.postdraw_hooks) w.buff;
     w
       
   let run fps world =

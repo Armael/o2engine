@@ -54,13 +54,15 @@ let () =
     set_restitution 0.99 >>=
 
     set_user_action (fun ui_state w ->
-      let w = set_postdraw_hook [] w in
+      let w = set_postdraw_hooks (fun m -> IMap.remove 0 m) w in
       List.fold_left (fun w (t, _) -> match t with
-      | Ui.Slide (v1, v2) -> modify_i 0
-	(fun b -> {b with speed = (2.) ** (v2 -- v1)}) w
-      | Ui.Sliding (v1, v2) -> set_postdraw_hook
-	[0, (fun buf -> moveto (int v1.x) (int v1.y) buf;
-	  lineto (int v2.x) (int v2.y) buf)] w
+      | Ui.Slide (v1, v2) -> w >>=
+	modify_i 0
+	(fun b -> {b with speed = (2.) ** (v2 -- v1)}) >>=
+	set_postdraw_hooks (fun m -> IMap.remove 0 m)
+      | Ui.Sliding (v1, v2) -> set_postdraw_hooks
+	(fun m -> IMap.add 0 (fun buf -> moveto (int v1.x) (int v1.y) buf;
+	  lineto (int v2.x) (int v2.y) buf) m) w
       | _ -> w) w ui_state) >>=
 
     run 60
