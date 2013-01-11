@@ -54,7 +54,7 @@ let new_missile () =
   {pos = {x = x; y = y};
    speed = speed;
    radius = 18.; id = 1;
-   mass = 5.; color = Color.black}
+   mass = 5.; color = Color.rgb 95 95 95}
 
 let rec read_action l w =
   let open Engine in
