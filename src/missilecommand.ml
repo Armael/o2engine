@@ -37,6 +37,8 @@ let draw_background buf =
   let lim_ground = 40 in
   draw_gradient {x = 0.; y = 0.} {x = float width; y = float lim_ground}
     (Color.rgb 28 13 13) (Color.rgb 91 50 45) buf;
+  draw_gradient {x = 0.; y = float lim_ground} {x = float width; y = float height}
+    (Color.rgb 183 196 218) (Color.rgb 85 114 168) buf;
   Screen.moveto 0 lim_ground buf;
   Screen.set_color Color.black buf;
   Screen.lineto width lim_ground buf
