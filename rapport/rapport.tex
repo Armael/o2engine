@@ -7,6 +7,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{graphicx}
+\usepackage{hyperref}
 
 \title{Implémentation d'un moteur physique 2D dans un langage fonctionnel}
 \subtitle{Et plus encore...}
@@ -201,6 +202,44 @@ logarithmique au lieu d'une complexité linéaire avec les listes.
 
 \subsection{Structures de données fonctionnelles et \emph{Zippers}}
 
+Quand intervient la problématique de la résolutions des collisions,
+les choses se compliquent. Il nous faut pouvoir itérer sur la
+structure de données, tout en pouvant modifier \emph{au cours de
+  l'itération} le contenu de la structure. Et ce de manière purement
+fonctionnelle.
+
+Les primitives classiques \texttt{map}, \texttt{fold} ou \texttt{iter}
+ne fonctionnent pas ici, puisqu'elles ne permettent pas de «~changer~»
+la structure au cours de l'itération.
+
+Pour ce faire, nous avons eu recours au concept de \emph{Zipper}
+\footnote{\href{http://www.haskell.org/haskellwiki/Zipper}{http://www.haskell.org/haskellwiki/Zipper}}.
+
+Il s'agit d'une structure de données décrivant une position dans la
+structure sur laquelle on souhaite itérer, ainsi que des fonctions
+permettant de déplacer cette position.
+
+L'exemple est simple pour les listes : une position est de type
+\texttt{'a list * 'a * 'a list}, décrivant 
+\begin{itemize}
+\item les éléments avant la position courante (listés à l'envers)
+\item l'élément courant
+\item les éléments après la position courante
+\end{itemize}
+
+Se déplacer dans la liste se fait facilement en temps constant, en
+enlevant un élément dans la liste de droite, et en en empilant un dans
+la liste de gauche.
+
+Par ailleurs, lorsque l'on est à une position donnée, on peut modifier
+le reste de la liste, en éditant les listes des éléments suivants et
+précédents.
+
+Le concept de \emph{Zipper} (que nous avons également implémenté sur
+les quadTrees - mais c'est un peu moins joli) nous permet ainsi
+d'itérer très précisément sur une structure fonctionnelle, tout en
+ayant une grande liberté sur les manipulations que l'on peut faire, et
+ce sans perte notable de performances.
 
 \section{Simulation physique : module \texttt{Phys}}
 [module Phys obtenu comme image du foncteur Phys.Make sur un module
