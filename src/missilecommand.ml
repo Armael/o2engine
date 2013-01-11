@@ -7,9 +7,11 @@ module PhysEngine = Phys.Make (C)
 module G = (Screen)
 module Engine = Engine.Make (PhysEngine) (G)
 
-let next_missile_delay = ref 100
+let next_asteroid_delay = ref 100
 let defense_ball_exist = ref false
 let launch = ref false
+let level = ref 0
+let nb_astroid_until_next_level = ref 8
 
 let width = 800 and height = 500 
 
@@ -93,9 +95,12 @@ let rec read_action l w =
   let rocket_speed = 700. in
   match l with
   | [] -> w
+  
   | (Sliding(v1,v2),pos)::ll -> read_action ll w;
+  
   | (Slide(v1,v2),pos)::ll -> 
     read_action ll w;
+    
   | (Keypress c, pos)::ll -> launch := false;
     if !defense_ball_exist then (
       map 
@@ -110,7 +115,9 @@ let rec read_action l w =
 	(add_ball {newBall with pos = {x = float (width / 2);y = 50.};
 	  radius = 12.;id = 0;
 	  mass =5.;color = Color.red} w);
+	  
 	|(Button_down, Pos(x,y))::ll ->read_action ll w;
+	
   | (Button_up, Pos(x,y))::ll ->
   if not(!defense_ball_exist) then (
       let newBall = Ball.create() in
@@ -155,10 +162,13 @@ let () =
     set_user_action (fun uia w ->
       defense_ball_exist := false;
       iter (fun b -> defense_ball_exist := !defense_ball_exist || (b.id = 0)) w;
-
-      next_missile_delay := !next_missile_delay - 1;
-      if !next_missile_delay = 0 then (
-	next_missile_delay := 100;
+      next_asteroid_delay := !next_asteroid_delay - 1;
+      if !next_asteroid_delay = 0 then (
+      if !nb_astroid_until_next_level = 0 then(
+      nb_astroid_until_next_level := 8;
+      level := min(!level + 1) 13);
+  nb_astroid_until_next_level := !nb_astroid_until_next_level - 1;
+	next_asteroid_delay := 100 - (5 * !level);
 	(add_ball (new_missile ()) w) >>=
 	  read_action uia;
       ) else read_action uia w
