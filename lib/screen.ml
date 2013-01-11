@@ -57,7 +57,9 @@ let set_color color buf = Graphics.set_color color
 let moveto x y buf = Graphics.moveto x y
 let rmoveto x y buf = Graphics.rmoveto x y
 let draw_rect x y w h buf = Graphics.draw_rect x y w h
+let fill_rect x y w h buf = Graphics.fill_rect x y w h
 let fill_circle x y r buf = Graphics.fill_circle x y r
+let draw_circle x y r buf = Graphics.draw_circle x y r
 let lineto x y buf = Graphics.lineto x y
 let rlineto x y buf = Graphics.rlineto x y
 

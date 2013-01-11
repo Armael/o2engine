@@ -36,7 +36,9 @@ module type GraphicEngine = sig
   val moveto : int -> int -> buffer -> unit
   val rmoveto : int -> int -> buffer -> unit
   val draw_rect : int -> int -> int -> int -> buffer -> unit
+  val fill_rect : int -> int -> int -> int -> buffer -> unit
   val fill_circle : int -> int -> int -> buffer -> unit
+  val draw_circle : int -> int -> int -> buffer -> unit
   val lineto : int -> int -> buffer -> unit
   val rlineto : int -> int -> buffer -> unit
   val set_text_size : int -> buffer -> unit
