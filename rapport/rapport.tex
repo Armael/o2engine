@@ -271,7 +271,9 @@ veut mettre, et fournit des fonctions de type \texttt{Ball.t ->
 Le module \texttt{Phys} est ainsi le plus général possible.
 
 Pour simuler tout ceci sans collisions, ce n'est pas très compliqué :
-en discrétisant le principe fondamental de la dynamique, pour une
+notre moteur physique fonctionne par simulation d'incréments de temps
+constants ($dt$) correspondants au nombre d'images par seconde voulu.
+En discrétisant le principe fondamental de la dynamique, pour une
 balle $b$, son évolution pendant un instant $dt$, et pour chaque force
 $f$ donne :
 \[
@@ -285,10 +287,52 @@ b_y = b_y + {v_y}_b \times dt
 \subsection{Gestion des collisions}
 \paragraph{Un peu de physique}
 
+Les équations de la physique nous donnent, dans le cas d'un choc de
+coefficient de restitution $C_R$ :
+\[
+v_a = \frac{m_a u_a + m_b u_b + m_b C_R (u_b - u_a)}{m_a + m_b}
+\]\[
+v_b = \frac{m_a u_a + m_b u_b + m_a C_R (u_a - u_b)}{m_a + m_b}
+\]
+où
+$v_a$ est la vitesse après le choc de la première balle\\
+$v_b$ est la vitesse après le choc de la deuxième balle\\
+$u_a$ et $u_b$ sont les vitesses avant le choc
+
 \paragraph{En pratique}
+
+En pratique on ne connait pas l'instant exact de la collision puisque
+l'on fonctionne par incréments de temps. On détecte ainsi si deux
+balles sont «~encastrées~» après $dt$, dans ce cas on passe notre
+fonction de résolution de collision \texttt{b2b\_collision\_solver} à
+une fonction du conteneur qui résoudra les collisions pour toutes les
+balles. Les calculs physiques se trouvent dans cette fonction de
+résolution.
+
+Les calculs de vitesse sont exactement les mêmes, et à ceux là
+s'ajoutent des calculs visant à décaler les balles afin qu'elles ne
+soient plus encastrées : on les écarte comme après une collision.
+
 \subsection{Ce que nous permettrait également notre monde purement
   fonctionnel}
-[Gestion plus fine des collisions, backtrack / dichotomie]
+Notre modèle actuel de gestion des collisions, s'il offre un rendu
+réaliste à l'œil, pourrait être amélioré pour offrir une gestion plus
+fine des collisions. Une idée est par exemple de réaliser une
+dichotomie temporelle pour trouver (au pixel près) l'instant de la
+collision. Or pour ce faire, il est très utile d'avoir un monde
+purement fonctionnel : on peut ainsi en garder plusieurs copies (ce
+qui est utile pour une dichotomie) de manière performante : avec un
+monde mutable, on serait obligé d'en faire explicitement une copie.
+
+Ici, on se repose sur l'implémentation OCaml qui, lorsque l'on copie
+de manière fonctionnelle un élément (en utilisant la syntaxe
+\texttt{\{w with value = new\_value\}} pour les enregistrements par
+exemple), ne va effectivement copier en mémoire que les champs qui ont
+été modifiés.
+
+On voit ici qu'utiliser un monde fonctionnel nous permet une plus
+grande souplesse de manipulation, ce qui nous permettrait
+d'implémenter une gestion plus fine des collisions assez simplement.
 
 \section*{}
 On a maintenant un moteur physique 2D (ne gérant certes que des
