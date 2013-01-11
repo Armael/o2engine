@@ -48,7 +48,12 @@ struct
     balls : C.t;
     f : (Ball.t -> Vector.t) list;
     borders : borders;
-    restitution : float
+    restitution : float;
+    (* Journalisation des collisions *)
+    ball_collisions_logged : bool;
+    ball_collisions : (Ball.t * Ball.t) Queue.t;
+    borders_collisions_logged : bool;
+    borders_collisions : (Ball.t * border_type) Queue.t
   }
 
   (* Teste si la balle b n'est pas en dehors pour la bordure b_type *)
@@ -78,7 +83,11 @@ struct
 	       left = None;
 	       top = None;
 	       bottom = None};
-    restitution = 1.
+    restitution = 1.;
+    ball_collisions_logged = false;
+    ball_collisions = Queue.create ();
+    borders_collisions_logged = false;
+    borders_collisions = Queue.create ()
   }
 
   (* Permet d'itérer sur les balles du monde *)
@@ -142,10 +151,17 @@ struct
   let set_restitution value w =
     { w with restitution = value}
 
+  let get_ball_collisions_log w = w.ball_collisions
+  let get_borders_collisions_log w = w.borders_collisions
+  let log_ball_collisions b w = {w with ball_collisions_logged = b}
+  let log_borders_collisions b w = {w with borders_collisions_logged = b}
+
   (* Fonction prenant deux balles en argument, supposées étant en
      collision, et retourne les deux balles après la résolution de la
      collision *)
   let b2b_collision_solver w b1 b2 =
+    if w.ball_collisions_logged then
+      Queue.add (b1, b2) w.ball_collisions;
     let open Ball in
     let open Vector in
     let delta = b1.pos -- b2.pos in
@@ -180,24 +196,32 @@ struct
 	  b >>=
 	    (fun b ->
 	      if w.borders.right <> None &&
-		b.pos.x > get w.borders.right -. b.radius then
-		{b with pos = {b.pos with x = get w.borders.right -. b.radius};
-		  speed = {b.speed with x = -. c *. b.speed.x}} else b) >>=
+		b.pos.x > get w.borders.right -. b.radius then (
+		  if w.borders_collisions_logged then
+		    Queue.add (b, Right) w.borders_collisions;
+		  {b with pos = {b.pos with x = get w.borders.right -. b.radius};
+		    speed = {b.speed with x = -. c *. b.speed.x}}) else b) >>=
 	    (fun b ->
 	      if w.borders.left <> None &&
-		b.pos.x < get w.borders.left +. b.radius then
-		{b with pos = {b.pos with x = get w.borders.left +. b.radius};
-		  speed = {b.speed with x = -. c *. b.speed.x}} else b) >>=
+		b.pos.x < get w.borders.left +. b.radius then (
+		  if w.borders_collisions_logged then
+		    Queue.add (b, Left) w.borders_collisions;
+		  {b with pos = {b.pos with x = get w.borders.left +. b.radius};
+		    speed = {b.speed with x = -. c *. b.speed.x}}) else b) >>=
 	    (fun b ->
 	      if w.borders.top <> None &&
-		b.pos.y > get w.borders.top -. b.radius then
-		{b with pos = {b.pos with y = get w.borders.top -. b.radius};
-		  speed = {b.speed with y = -. c *. b.speed.y}} else b) >>=
+		b.pos.y > get w.borders.top -. b.radius then (
+		  if w.borders_collisions_logged then
+		    Queue.add (b, Top) w.borders_collisions;
+		  {b with pos = {b.pos with y = get w.borders.top -. b.radius};
+		    speed = {b.speed with y = -. c *. b.speed.y}}) else b) >>=
 	    (fun b ->
 	      if w.borders.bottom <> None &&
-		b.pos.y < get w.borders.bottom +. b.radius then
-		{b with pos = {b.pos with y = get w.borders.bottom +. b.radius};
-		  speed = {b.speed with y = -. c *. b.speed.y}} else b)) w.balls}
+		b.pos.y < get w.borders.bottom +. b.radius then (
+		  if w.borders_collisions_logged then
+		    Queue.add (b, Bottom) w.borders_collisions;
+		  {b with pos = {b.pos with y = get w.borders.bottom +. b.radius};
+		    speed = {b.speed with y = -. c *. b.speed.y}}) else b)) w.balls}
 
   (* Simule le mouvement d'une balle sans tenir compte des collisions
      pendant dt *)
