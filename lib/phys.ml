@@ -17,6 +17,7 @@ module type Container = sig
   val empty : Vector.t -> Vector.t -> t
   val add : Ball.t -> t -> t
   val iter : (Ball.t -> unit) -> t -> unit
+  val remove : Ball.t -> t -> t
   val map : (Ball.t -> Ball.t) -> t -> t
   val modify : Ball.t -> Ball.t -> t -> t
   val modify_i : int -> (Ball.t -> Ball.t) -> t -> t
@@ -94,6 +95,7 @@ struct
   let iter f w = C.iter f w.balls
 
   let map f w = {w with balls = C.map f w.balls}
+  let remove b w = {w with balls = C.remove b w.balls}
 
   let modify b b' w = {w with balls = C.modify b b' w.balls}
   let modify_i i f w = {w with balls = C.modify_i i f w.balls}

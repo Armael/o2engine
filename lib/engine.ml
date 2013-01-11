@@ -8,6 +8,7 @@ module type PhysEngine = sig
   val iter : (Ball.t -> unit) -> world -> unit
   val resize : Vector.t -> Vector.t -> world -> world
   val map : (Ball.t -> Ball.t) -> world -> world
+  val remove : Ball.t -> world -> world
   val modify : Ball.t -> Ball.t -> world -> world
   val modify_i : int -> (Ball.t -> Ball.t) -> world -> world
 
@@ -111,6 +112,8 @@ struct
     }
 
   let map f w = {w with phys = P.map f w.phys}
+  let remove b w = {w with phys = P.remove b w.phys}
+
   let iter f w = P.iter f w.phys
   let modify b b' w = {w with phys = P.modify b b' w.phys}
   let modify_i i f w = {w with phys = P.modify_i i f w.phys}
