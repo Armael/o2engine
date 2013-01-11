@@ -100,13 +100,13 @@ let rec read_action l w =
       map 
 	(fun b ->
 	  match b.id with
-	  | 0 -> {b with pos = {x = float (width / 2);y = 20.}; speed = {x = 0.;y = 0.}}
+	  | 0 -> {b with pos = {x = float (width / 2);y = 50.}; speed = {x = 0.;y = 0.}}
 	  | _ -> b) w >>=
 	read_action ll
     ) else
       let newBall = Ball.create() in
       read_action ll
-	(add_ball {newBall with pos = {x = float (width / 2);y = 20.};
+	(add_ball {newBall with pos = {x = float (width / 2);y = 50.};
 	  radius = 12.;id = 0;
 	  mass =5.;color = Color.red} w);
   | (Button_up, Pos(x,y))::ll -> if !defense_ball_exist && not (!launch) then (
@@ -117,7 +117,7 @@ let rec read_action l w =
    	   match b.id with
    	   | 0 -> {b with speed = rocket_speed ** (unit (sub {x = (float_of_int x);
 							      y = (float_of_int y)}
-							   {x = float (width / 2);y = 20.}))}
+							   {x = float (width / 2);y = 50.}))}
    	   | _ -> b) w)
       
   ) else read_action ll w;
@@ -134,7 +134,7 @@ let () =
   let open Vector in
 
   world >>=
-    set_border PhysEngine.Bottom 0. >>=
+    set_border PhysEngine.Bottom 30. >>=
     set_user_action (fun uia w ->
       defense_ball_exist := false;
       iter (fun b -> defense_ball_exist := !defense_ball_exist || (b.id = 0)) w;
