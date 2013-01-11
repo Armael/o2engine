@@ -65,6 +65,7 @@ struct
     buff : G.buffer;
     borders_follow_buff_size : bool;
     predraw_hooks : (G.buffer -> unit) IMap.t;
+    ball_hook : (Ball.t -> G.buffer -> unit);
     postdraw_hooks : (G.buffer -> unit) IMap.t;
     fps : float Queue.t;
     user_action : Ui.status -> world -> world
@@ -95,6 +96,12 @@ struct
       borders_follow_buff_size = false;
       fps = Queue.create ();
       predraw_hooks = IMap.empty;
+      ball_hook = (fun b buf -> 
+	let open Vector in
+	let open Ball in
+	G.set_color b.color buf;
+	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
+	G.set_color Color.black buf);
       postdraw_hooks = IMap.empty;
       user_action = (fun _ w -> w)
     }
@@ -112,6 +119,7 @@ struct
   let add_f f w = {w with phys = P.add_f f w.phys}
 
   let set_predraw_hooks f w = {w with predraw_hooks = f w.predraw_hooks}
+  let set_ball_hook f w = {w with ball_hook = f}
   let set_postdraw_hooks f w = {w with postdraw_hooks = f w.postdraw_hooks}
 
   let set_user_action f w = {w with user_action = f}
@@ -131,11 +139,9 @@ struct
       G.clear buf;
       IMap.iter (fun _ f -> f buf) w.predraw_hooks;
       P.iter (fun b ->
-	G.set_color b.color buf;
-	G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
-	G.set_color Color.black buf;
-	G.draw_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf
+	w.ball_hook b buf;
       ) w.phys;
+      G.set_color Color.black buf;
       draw_fps buf;
       IMap.iter (fun _ f -> f buf) w.postdraw_hooks) w.buff;
     w
