@@ -60,6 +60,7 @@ let rec read_action l w =
   let open Engine in
   let open Ball in
   let open Vector in
+  let rocket_speed = 700. in
   match l with
   | [] -> w
   | (Slide(v1,v2),pos)::ll -> 
@@ -84,9 +85,9 @@ let rec read_action l w =
       (map
    	 (fun b ->
    	   match b.id with
-   	   | 0 -> {b with speed = (sub {x = (float_of_int x);
-					y = (float_of_int y)}
-				     {x = float (width / 2);y = 20.} )}
+   	   | 0 -> {b with speed = rocket_speed ** (unit (sub {x = (float_of_int x);
+							      y = (float_of_int y)}
+							   {x = float (width / 2);y = 20.}))}
    	   | _ -> b) w)
       
   ) else read_action ll w;
