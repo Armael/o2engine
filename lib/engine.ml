@@ -14,6 +14,10 @@ module type PhysEngine = sig
   val set_border : border_type -> float -> world -> world
   val unset_border : border_type -> world -> world
   val set_restitution : float -> world -> world
+  val get_ball_collisions_log : world -> (Ball.t * Ball.t) Queue.t
+  val get_borders_collisions_log : world -> (Ball.t * border_type) Queue.t
+  val log_ball_collisions : bool -> world -> world
+  val log_borders_collisions : bool -> world -> world
   val add_ball : Ball.t -> world -> world
   val add_f : (Ball.t -> Vector.t) -> world -> world
   val simulate : float -> world -> world
@@ -121,6 +125,11 @@ struct
   let set_predraw_hooks f w = {w with predraw_hooks = f w.predraw_hooks}
   let set_ball_hook f w = {w with ball_hook = f}
   let set_postdraw_hooks f w = {w with postdraw_hooks = f w.postdraw_hooks}
+
+  let get_ball_collisions_log w = P.get_ball_collisions_log w.phys
+  let get_borders_collisions_log w = P.get_borders_collisions_log w.phys
+  let log_ball_collisions b w = {w with phys = P.log_ball_collisions b w.phys}
+  let log_borders_collisions b w = {w with phys = P.log_borders_collisions b w.phys}
 
   let set_user_action f w = {w with user_action = f}
 
