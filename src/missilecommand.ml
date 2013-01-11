@@ -7,9 +7,14 @@ module PhysEngine = Phys.Make (C)
 module G = (Screen)
 module Engine = Engine.Make (PhysEngine) (G)
 
-let next_missile_delay = ref 100
+let next_asteroid_delay = ref 100
 let defense_ball_exist = ref false
 let launch = ref false
+let level = ref 0
+let nb_astroid_until_next_level = ref 8
+let score = ref 0
+let life = ref 10
+
 
 let width = 800 and height = 500 
 
@@ -93,9 +98,12 @@ let rec read_action l w =
   let rocket_speed = 700. in
   match l with
   | [] -> w
+  
   | (Sliding(v1,v2),pos)::ll -> read_action ll w;
+  
   | (Slide(v1,v2),pos)::ll -> 
     read_action ll w;
+    
   | (Keypress c, pos)::ll -> launch := false;
     if !defense_ball_exist then (
       map 
@@ -110,8 +118,11 @@ let rec read_action l w =
 	(add_ball {newBall with pos = {x = float (width / 2);y = 50.};
 	  radius = 12.;id = 0;
 	  mass =5.;color = Color.red} w);
+	  
 	|(Button_down, Pos(x,y))::ll ->read_action ll w;
+	
   | (Button_up, Pos(x,y))::ll ->
+  score := !score - 20;
   if not(!defense_ball_exist) then (
       let newBall = Ball.create() in
        launch := true;
@@ -144,25 +155,87 @@ let rec read_action l w =
 let () =
   let open G in
   let open Engine in  
-
-  let world = Engine.new_world width height in
   Random.self_init ();
+
   let open Ball in
   let open Vector in
 
-  world >>=
+		let rec main_world() = 
+		Engine.new_world width height >>=
+		set_user_action (fun uia w ->
+		let rec read l w= 
+		match l with 
+		|[]->w
+		|(Keypress c, pos)::ll -> world()
+		|_::ll-> read ll w
+		in 
+		read uia w
+		)
+		>>=  
+		set_predraw_hooks (fun m -> IMap.add 0 draw_background m) >>=
+		set_postdraw_hooks (fun m ->      
+    IMap.add 0 (fun buf ->
+     if !life <= 0 then    
+    G.draw_string (buf.G.width / 2 - 50) (buf.G.height / 2 + 20)
+	(Printf.sprintf "Vous avez perdu") buf;
+   G.draw_string (buf.G.width / 2 - 50) (buf.G.height / 2)
+	(Printf.sprintf "Votre score : %d" !score) buf;
+		G.draw_string (buf.G.width / 2 - 200) (buf.G.height / 2 - 20)
+	(Printf.sprintf "Appuyez sur une touche du clavier pour lancer un nouveau jeu") buf) m)
+
+    and world() = 
+     life := 10;
+    	 Engine.new_world width height >>=
+     log_ball_collisions true >>=
+     log_borders_collisions true >>=
     set_border PhysEngine.Bottom 30. >>=
     set_user_action (fun uia w ->
+      let ball_log = get_ball_collisions_log w in
+      	let borders_log  = get_borders_collisions_log w in
+      		while not (Queue.is_empty ball_log) do
+      			let (b1,b2) = Queue.pop ball_log in
+      				match (b1.id,b2.id) with
+      				|(0,_)->score := !score  + 50
+      				|(_,0)->score := !score  + 50
+      				|_->()
+      			done;
+      	while not (Queue.is_empty borders_log) do
+      	let (b,a) = Queue.pop borders_log in
+			match b.id with
+						|0->()
+			      	|_->
+			      	if b.pos.x >= 122. && b.pos.x <= 620. then life := !life - b.id
+			  done;
+      
       defense_ball_exist := false;
       iter (fun b -> defense_ball_exist := !defense_ball_exist || (b.id = 0)) w;
-
-      next_missile_delay := !next_missile_delay - 1;
-      if !next_missile_delay = 0 then (
-	next_missile_delay := 100;
+      next_asteroid_delay := !next_asteroid_delay - 1;
+      if !next_asteroid_delay = 0 then (
+      if !nb_astroid_until_next_level = 0 then(
+      nb_astroid_until_next_level := 8;
+      level := min(!level + 1) 13);
+  nb_astroid_until_next_level := !nb_astroid_until_next_level - 1;
+	next_asteroid_delay := 100 - (5 * !level);
 	(add_ball (new_missile ()) w) >>=
 	  read_action uia;
-      ) else read_action uia w
-    ) >>= 
+      )else 
+      (
+      if !life <= 0 then
+      (
+      main_world()
+      )
+      else read_action uia w;
+      )
+    )>>= 
     set_predraw_hooks (fun m -> IMap.add 0 draw_background m) >>=
-    set_ball_hook draw_object >>=
+    set_postdraw_hooks (fun m ->      
+    IMap.add 0 (fun buf -> G.draw_string 50 (buf.G.height - 20)
+	(Printf.sprintf "Score : %d" !score) buf;
+		G.draw_string 50 (buf.G.height - 40)
+	(Printf.sprintf "Life : %d" !life) buf) m)
+    >>=
+    set_ball_hook draw_object 
+    in
+    
+    main_world()>>=
     run 60
