@@ -3,7 +3,8 @@ open Utils
 module C = QuadTreeContainer
 module PhysEngine = Phys.Make (C)
 
-module Engine = Engine.Make (PhysEngine) (Screen)
+module G = Screen
+module Engine = Engine.Make (PhysEngine) (G)
 
 let balls_list xm ym = [(50., ym/.2., 0); (xm /. 2., ym /. 2., 1);
 			((xm /. 2.) +. 30., (ym /. 2.) +. 30., 1);
@@ -32,7 +33,7 @@ let () =
 		       (add_ball {newBall with pos = {x = x; y = y};
 			 radius = rad; id = i;
 			 mass = 5.;
-			 color = (if i = 0 then Color.blue else Color.red)} w)
+			 color = (if i = 0 then Color.white else (Color.rgb 164 83 17))} w)
   in
 
   world >>=
@@ -64,5 +65,14 @@ let () =
 	(fun m -> IMap.add 0 (fun buf -> moveto (int v1.x) (int v1.y) buf;
 	  lineto (int v2.x) (int v2.y) buf) m) w
       | _ -> w) w ui_state) >>=
+    set_predraw_hooks (fun m ->
+      IMap.add 0 (fun buf -> 
+	G.set_color (Color.rgb 9 70 12) buf;
+	G.fill_rect 0 0 (int xm) (int ym) buf) m) >>=
+    set_ball_hook (fun b buf ->
+      G.set_color b.color buf;
+      G.fill_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf;
+      G.set_color Color.black buf;
+      G.draw_circle (int b.pos.x) (int b.pos.y) (int b.radius) buf) >>=
 
     run 60
