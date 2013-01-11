@@ -42,7 +42,21 @@ let draw_background buf =
     (Color.rgb 183 196 218) (Color.rgb 85 114 168) buf;
   G.moveto 0 lim_ground buf;
   G.set_color Color.black buf;
-  G.lineto width lim_ground buf
+  G.lineto width lim_ground buf;
+
+  let rect c x y w h =
+    G.set_color c buf;
+    G.fill_rect x y w h buf;
+    G.set_color Color.black buf;
+    G.draw_rect x y w h buf in
+
+  (* Dessin de la base *)
+  rect (Color.rgb 126 38 0) 122 10 107 27;
+  rect (Color.rgb 48 89 24) 227 10 73 47;
+  rect (Color.rgb 122 8 57) 300 10 73 85;
+  rect (Color.rgb 117 101 8) 316 10 120 55;
+  rect (Color.rgb 10 81 48) 436 10 122 106;
+  rect (Color.rgb 31 42 2) 497 10 123 55
 
 let draw_object b buf =
   let open Ball in
