@@ -93,6 +93,7 @@ let rec read_action l w =
   let rocket_speed = 700. in
   match l with
   | [] -> w
+  | (Sliding(v1,v2),pos)::ll -> read_action ll w;
   | (Slide(v1,v2),pos)::ll -> 
     read_action ll w;
   | (Keypress c, pos)::ll -> launch := false;
@@ -109,20 +110,36 @@ let rec read_action l w =
 	(add_ball {newBall with pos = {x = float (width / 2);y = 50.};
 	  radius = 12.;id = 0;
 	  mass =5.;color = Color.red} w);
-  | (Button_up, Pos(x,y))::ll -> if !defense_ball_exist && not (!launch) then (
+	|(Button_down, Pos(x,y))::ll ->read_action ll w;
+  | (Button_up, Pos(x,y))::ll ->
+  if not(!defense_ball_exist) then (
+      let newBall = Ball.create() in
+       launch := true;
+       defense_ball_exist := true;
+      read_action ll
+		(add_ball {newBall with pos = {x = float (width / 2);y = 20.};
+	  radius = 12.;id = 0;
+	  mass =5.;color = Color.red} w) >>=
+	   (map
+   	 (fun b ->
+   	   match b.id with
+   	   | 0 -> {b with speed = rocket_speed ** (unit (sub {x = (float_of_int x);
+							      y = (float_of_int y)}
+							   {x = float (width / 2);y = 20.}))}
+   	   | _ -> b))
+   	)
+	  else (
+	  defense_ball_exist := false; 
     launch := true;
     read_action ll
       (map
    	 (fun b ->
    	   match b.id with
-   	   | 0 -> {b with speed = rocket_speed ** (unit (sub {x = (float_of_int x);
+   	   | 0 -> {b with pos = {x = float (width / 2);y = 20.}; speed = rocket_speed ** (unit (sub {x = (float_of_int x);
 							      y = (float_of_int y)}
 							   {x = float (width / 2);y = 50.}))}
-   	   | _ -> b) w)
-      
-  ) else read_action ll w;
-  | (_, pos)::ll ->
-    read_action ll w
+   	   | _ -> b) w))
+
 
 let () =
   let open G in
