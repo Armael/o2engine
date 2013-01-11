@@ -20,6 +20,16 @@
 \newpage
 
 \section*{Introduction}
+La réalisation d'un moteur graphique en 2D à été réalisé dans le cadre d'un projet en Ocaml.
+
+un moteur physique consiste à simuler des interactions physiques entre différents objets. Ceci peut être les interaction électromagnétique ou les interactions gravitationnelles pour des simulation de mouvement de corps célestes ou d'entités chargées électriquement. Mais cela peut aussi être, comme dans notre cas, d'interaction sur des corps plus dans notre ordre de grandeur en simulant les force usuelles comme la gravité ou les frottement, ainsi qu'en gérant les collisions entre les différents objet. Bien que ce dernier soit utilisé en majeur partie pour les jeux vidéo il peut aussi avoir des considération physiques avec par exemple la simulation de gaz. Et bien que ce problème soit en théorie simple, en effet il ne suffirai que d'appliquer des formules physiques sur des phénomènes physiques de nombreuses fois étudié, il lève de nombreuses contraintes et se révèle assez compliqué à mettre en œuvre tout en prenant en compte les contraintes informatiques en elle même nous forçant à utiliser des structures de données optimisant la simulation. C'est d'ailleurs la raison pour laquelle nous nous bornerons dans ce projet à la forme la plus simple qui puisse exister, qui est la boule.
+
+On s'est proposé ainsi au cours du projet d'implémenter un moteur physique 2D ne gérant que des boules. Nous présenterons alors au cours de ce rapport un moteur physique, différentes structures de données, une interface graphique utilisateur, ainsi que quelques applications de ce moteur graphique.
+
+Dans un premier temps nous introduirons succinctement  le développement et l'organisation du code. Puis par la suite présenté les structures de données nous permettant de rendre compte et d'interagir avec le monde. Ensuite décrire notre moteur physique. Après exposer notre interface graphique. Pour finir par l'illustration de toutes ces composantes par le biais d'applications.
+
+
+
 \addcontentsline{toc}{section}{Introduction}
 
 \section{Philosophie de développement et organisation du code}
