@@ -132,11 +132,11 @@ fonctionnelles, simulation physique et gestion des collisions.
   et \texttt{QuadTreeContainer}}
 \subsection{\texttt{ListContainer} : conteneurs utilisant des listes}
 
-Lorsqu'il s'agit de stocker des données dans une structure de donnée
-permettant d'avoir toutes les données pour la restitution du monde. Il
-est aussi nécessaire d'avoir des fonctions associé à cette structure
-de donnée permettant une certaine interaction avec les éléments de ce
-monde, par exemple ajouter ou retirer un élément, actualiser l'élément
+Lorsqu'il s'agit de stocker des données dans une structure permettant
+d'avoir toutes les informations pour la restitution du monde, il est
+aussi nécessaire d'avoir des fonctions associées à cette structure
+permettant une certaine interaction avec les éléments de ce monde, par
+exemple ajouter ou retirer un élément, actualiser l'élément, etc.
 
 C'est pourquoi la première idée est de stocker ces élément dans une
 liste. Cette première structure est assez simple à mettre en œuvre et
@@ -144,7 +144,7 @@ ne génère pas de cas problématiques particuliers. les fonctions sont
 déjà définies mais dans notre cas il est nécessaire de légèrement les
 modifier pour avoir une structure modulaire.  Il nous faut prendre en
 compte aussi la taille du monde c'est pourquoi au lieu d'avoir un type
-list tout simplement on a un type Vector * Vector * list.
+list tout simplement on a un type \texttt{Vector * Vector * list}.
 
 Toutefois, bien que simple a mettre en place elle est très peu
 optimisée. C'est pourquoi nous allons voir une structure différente,
