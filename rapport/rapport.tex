@@ -199,4 +199,68 @@ C'est le module \texttt{Engine} qui va ensuite utiliser ce module, et
 passera au \emph{hook} \texttt{user\_action} la liste des évènements
 apparus.
 
+\subsection*{}
+Nous avons ainsi un joli moteur de jeu tout beau, tout propre. Pour
+programmer un scénario quelconque, il suffit de créer un nouveau
+monde, d'ajouter nos balles, nos forces, de définir nos fonctions de
+dessin et nos \emph{hooks} éventuels, puis de lancer la simulation.
+
+
+\section{Application : on utilise notre moteur}
+
+\subsection{Quelques situations d'exemple}
+
+Nous avons programmé tout d'abord quelques situations assez simples,
+visant en premier lieu à tester les capacités de simulation physique
+du moteur. Celles-ci sont regroupées dans le programme \texttt{main},
+et peuvent être choisies dans le menu.
+
+Elles ne font pas usage des \emph{hooks} ou autres joyeusetés, et se
+contentent d'ajouter des boules, de régler le coefficient de
+restitution des chocs et de mettre différentes forces.
+
+On remarque (grâce à l'afficheur d'images par seconde dotamment - en
+haut à droite) que si l'on modifie le programme \texttt{main} pour
+utiliser le conteneur utilisant des listes à la place des quadTrees,
+la situation «~stress test~» est beaucoup plus lente - le quadTree
+optimise en effet les calculs de collisions pour un nombre important
+de balles.
+
+\subsection{Le billard}
+
+Cette fois-ci, il s'agit d'un programme utilisant des fonctionnalités
+un peu plus avancées du moteur : un \texttt{predraw\_hook} est mis
+pour afficher le fond, et on utilise dans le hook
+\texttt{user\_action} les évènements \texttt{Sliding} provenant du
+module \texttt{Ui} pour permettre de propulser la balle blanche en
+cliquant-glissant.
+
+On notera également l'ajout de forces un peu plus fines que sur les
+autres exemples : pour tenter d'avoir un rendu le plus réaliste
+possible, nous ajoutons une force de frottement fluide, ainsi qu'une
+force de frottement solide.
+
+\subsection{MissileCommand : protégez votre base spatiale !}
+
+Il s'agit du dernier programme utilisant notre moteur, et utilisant
+ses fonctionnalités les plus poussées !
+
+MissileCommand est inspiré du jeu d'arcade éponyme, édité par Atari en
+1980, où l'on doit protéger notre base de missiles arrivant de
+l'espace. Ici, dans ce nouvel opus remis au goût du jour\footnote{le
+  21 Décembre 2012 plus précisément} il ne s'agit plus de missiles
+mais de météorites, et bien entendu on joue sur la physique et les
+collisions pour les repousser.
+
+Ainsi, en cliquant on lance un projectile qui repousse les météorites
+afin qu'ils ne tombent pas sur notre base. Tirer des projectiles fait
+perdre de l'argent (et des points), tandis qu'on en gagne en
+repoussant des astéroïdes. L'objectif est bien entendu de protéger la
+base.
+
+On utilise ici toutes les fonctionnalités de notre moteur :
+\texttt{predraw\_hooks} pour afficher le fond, lecture du journal de
+collisions, et modification de la fonction d'affichage des balles pour
+dessiner les astéroïdes.
+
 \end{document}
