@@ -132,25 +132,71 @@ fonctionnelles, simulation physique et gestion des collisions.
   et \texttt{QuadTreeContainer}}
 \subsection{\texttt{ListContainer} : conteneurs utilisant des listes}
 
-Lorsqu'il s'agit de stockée des données dans une structure de donnée permettant d'avoir toutes les données pour la restitution du monde. Il est aussi nécessaire d'avoir des fonctions associé à cette structure de donnée permettant une certaine interaction avec les éléments de ce monde, par exemple ajouter ou retirer un élément, actualiser l'élément
+Lorsqu'il s'agit de stocker des données dans une structure de donnée
+permettant d'avoir toutes les données pour la restitution du monde. Il
+est aussi nécessaire d'avoir des fonctions associé à cette structure
+de donnée permettant une certaine interaction avec les éléments de ce
+monde, par exemple ajouter ou retirer un élément, actualiser l'élément
 
-C'est pourquoi la première idée est de stocker  ces élément dans une liste. Cette première structure est assez simple à mettre en œuvre et ne génère pas de cas problématiques particuliers. les fonctions sont déjà définies mais dans notre cas il est nécessaire de légèrement les modifier pour avoir une structure modulaire. 
-Il nous faut prendre en compte aussi la taille du monde c'est pourquoi au lieu d'avoir un type list tout simplement on a un type Vector * Vector * list.
+C'est pourquoi la première idée est de stocker ces élément dans une
+liste. Cette première structure est assez simple à mettre en œuvre et
+ne génère pas de cas problématiques particuliers. les fonctions sont
+déjà définies mais dans notre cas il est nécessaire de légèrement les
+modifier pour avoir une structure modulaire.  Il nous faut prendre en
+compte aussi la taille du monde c'est pourquoi au lieu d'avoir un type
+list tout simplement on a un type Vector * Vector * list.
 
-Toutefois, bien que simple a mettre en place elle est très peu optimisée. C'est pourquoi nous allons voir une structure différente, plus complexe mais qui nous permettra d'avoir de meilleures performances.
+Toutefois, bien que simple a mettre en place elle est très peu
+optimisée. C'est pourquoi nous allons voir une structure différente,
+plus complexe mais qui nous permettra d'avoir de meilleures
+performances.
 
 
 \subsection{\texttt{QuadTreeContainer} : une structure arborescente
   pour stocker nos balles}
 
-Les quadTree sont une structure arborescente dont les nœuds possèdent chacun 4 sous-arbre, ces sous-arbres représentent le découpage du plan en quatre parties, la partie en haut à gauche, en bas à droite, etc. Ainsi en décomposant un plan en quatre parties et en plaçant chacun de ces élément dans une de ces sous-partie nous permet d'optimiser la gestion des collisions, en effet les boules se trouvant dans un sous-arbre ne peuvent, en théorie, être en collision avec les boules d'un des trois autre sous-arbre nous limitant ainsi les calculs à effectuer.
+Les quadTree sont une structure arborescente dont les nœuds possèdent
+chacun 4 sous-arbre, ces sous-arbres représentent le découpage du plan
+en quatre parties, la partie en haut à gauche, en bas à droite,
+etc. Ainsi en décomposant un plan en quatre parties et en plaçant
+chacun de ces élément dans une de ces sous-partie nous permet
+d'optimiser la gestion des collisions, en effet les boules se trouvant
+dans un sous-arbre ne peuvent, en théorie, être en collision avec les
+boules d'un des trois autre sous-arbre nous limitant ainsi les calculs
+à effectuer.
 
-Cependant lorsque nous avons des boules de tailles différentes, et surtout quand la différence des tailles est grande, ce principe doit être adapté car les boules de grande tailles peuvent dépasser de leur domaine.
-Il s'offrait plusieurs solutions à nous, soit nous ne considérions que les centre des boules et adaptions la gestion des collision en fonction du rayon de la boule, soit nous découpions la boule en plusieurs partie pour la placer dans plusieurs feuilles et faisions en sorte d'éviter de faire un calcul pour gérer le collision entre la même boule mais situé dans plusieurs feuilles.
+Cependant lorsque nous avons des boules de tailles différentes, et
+surtout quand la différence des tailles est grande, ce principe doit
+être adapté car les boules de grande tailles peuvent dépasser de leur
+domaine.  Il s'offrait plusieurs solutions à nous, soit nous ne
+considérions que les centre des boules et adaptions la gestion des
+collision en fonction du rayon de la boule, soit nous découpions la
+boule en plusieurs partie pour la placer dans plusieurs feuilles et
+faisions en sorte d'éviter de faire un calcul pour gérer le collision
+entre la même boule mais situé dans plusieurs feuilles.
 
-Trouvant ces méthodes peut satisfaisantes, par exemple pour dans le cas de la duplication des balles lors d'un dépassement de domaine peut conduire a un arbre très grand contenant beaucoup plus d'éléments que le nombre total de boules réduisant ainsi grandement la performance du quadTree, nous avons opter pour un quadTree a plusieurs niveau. C'est à dire que chaque nœud de l'arbre va contenir une liste, peut-être vide, de balles, ces balles sont celles qui ne peuvent pas être placées dans un unique sous-arbre. De ce fait les balles dont le rayon est important se trouvera peu profond dans l'arbre tandis que les balle dont le rayon est petit se trouveront généralement dans les nœuds les plus profonds de l'arbre. Par conséquent une balles pourra entrer en collision avec les balles qui sont dans le même nœud qu'elle, dans les nœuds de ses sous-arbres, et dans les nœuds de ses pères. Ceci nous permet d'avoir un bon compromis entre l'optimisation et la gestion des problématiques liées à la structure de quadTree.
+Trouvant ces méthodes peut satisfaisantes, par exemple pour dans le
+cas de la duplication des balles lors d'un dépassement de domaine peut
+conduire a un arbre très grand contenant beaucoup plus d'éléments que
+le nombre total de boules réduisant ainsi grandement la performance du
+quadTree, nous avons opter pour un quadTree a plusieurs niveau. C'est
+à dire que chaque nœud de l'arbre va contenir une liste, peut-être
+vide, de balles, ces balles sont celles qui ne peuvent pas être
+placées dans un unique sous-arbre. De ce fait les balles dont le rayon
+est important se trouvera peu profond dans l'arbre tandis que les
+balle dont le rayon est petit se trouveront généralement dans les
+nœuds les plus profonds de l'arbre. Par conséquent une balles pourra
+entrer en collision avec les balles qui sont dans le même nœud
+qu'elle, dans les nœuds de ses sous-arbres, et dans les nœuds de ses
+pères. Ceci nous permet d'avoir un bon compromis entre l'optimisation
+et la gestion des problématiques liées à la structure de quadTree.
 
-Théoriquement, dans la majeur partie des cas, avec cette structure nous avons une meilleure complexité qu'avec l'utilisation des listes et dans certain cas particulier nécessitant un fort concours de circonstance une complexité équivalente avec celle des listes. Les quadTree nous permettent dans l'absolu d'avoir une complexité logarithmique au lieu d'une complexité linéaire avec les listes.
+Théoriquement, dans la majeur partie des cas, avec cette structure
+nous avons une meilleure complexité qu'avec l'utilisation des listes
+et dans certain cas particulier nécessitant un fort concours de
+circonstance une complexité équivalente avec celle des listes. Les
+quadTree nous permettent dans l'absolu d'avoir une complexité
+logarithmique au lieu d'une complexité linéaire avec les listes.
 
 \subsection{Structures de données fonctionnelles et \emph{Zippers}}
 
