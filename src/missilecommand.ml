@@ -117,7 +117,7 @@ let rec read_action l w =
        launch := true;
        defense_ball_exist := true;
       read_action ll
-		(add_ball {newBall with pos = {x = float (width / 2);y = 20.};
+		(add_ball {newBall with pos = {x = float (width / 2);y = 50.};
 	  radius = 12.;id = 0;
 	  mass =5.;color = Color.red} w) >>=
 	   (map
@@ -125,7 +125,7 @@ let rec read_action l w =
    	   match b.id with
    	   | 0 -> {b with speed = rocket_speed ** (unit (sub {x = (float_of_int x);
 							      y = (float_of_int y)}
-							   {x = float (width / 2);y = 20.}))}
+							   {x = float (width / 2);y = 50.}))}
    	   | _ -> b))
    	)
 	  else (
@@ -135,7 +135,7 @@ let rec read_action l w =
       (map
    	 (fun b ->
    	   match b.id with
-   	   | 0 -> {b with pos = {x = float (width / 2);y = 20.}; speed = rocket_speed ** (unit (sub {x = (float_of_int x);
+   	   | 0 -> {b with pos = {x = float (width / 2);y = 50.}; speed = rocket_speed ** (unit (sub {x = (float_of_int x);
 							      y = (float_of_int y)}
 							   {x = float (width / 2);y = 50.}))}
    	   | _ -> b) w))
