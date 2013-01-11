@@ -42,7 +42,7 @@ a une syntaxe cool]
 effectives des modules présentés. Au programme : structures de données
 fonctionnelles, simulation physique et gestion des collisions.
 
-\section{Containeurs de balles : les modules \texttt{ListContainer}
+\section{Containers de balles : les modules \texttt{ListContainer}
   et \texttt{QuadTreeContainer}}
 \subsection{Structures de données fonctionnelles et \emph{Zippers}}
 \subsection{\texttt{ListContainer} : conteneurs utilisant des listes}
@@ -87,8 +87,8 @@ Le module Engine est le module avec lequel traitera au final
 l'utilisateur : il doit principalement permettre de simuler la
 physique et fournir une sortie graphique quelconque. Son rôle est en
 fait d'agencer les deux mondes : «~brancher~» le moteur physique, qui
-ne connait rien de l'affichage, sur un module dédié à l'affichage, qui
-lui ne connait rien des objets physiques.
+ne connaît rien de l'affichage, sur un module dédié à l'affichage, qui
+lui ne connaît rien des objets physiques.
 
 La pièce centrale d'\texttt{Engine} est donc une fois encore un
 foncteur, \texttt{Make}, prenant en argument un module contenant un
@@ -113,7 +113,7 @@ taille de l'écran et des informations spécifiques à l'implémentations
 (cachées dans un type abstrait par la signature), comme le
 \emph{double buffering} (activé).
 
-Connaitre la taille du buffer d'affichage est notamment important pour
+Connaître la taille du buffer d'affichage est notamment important pour
 les modules «~au dessus~», utilisant ce module ci : par exemple, le
 module \texttt{Engine} en fait usage pour synchroniser (si l'option
 \texttt{borders\_follow\_buffer\_size} est à \texttt{true}) les bordures
