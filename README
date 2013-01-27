@@ -1,0 +1,18 @@
+Ce projet est organisé classiquement en deux répertoires :
+
+   lib/ contenant les bibliothèques (ici des modules ocaml)
+   src/ contenant les programmes les utilisant
+
+Il y a les programmes suivants :
+
+   main
+   billard
+   missilecommand
+
+Pour compiler un d'entre eux, taper
+
+     make <nom du programme>
+
+Pour nettoyer, 
+     
+     make mproper
