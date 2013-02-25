@@ -18,3 +18,6 @@ missilecommand:
 
 mproper:
 	$(CC) -clean
+	rm -rf rapport/*.toc
+	rm -rf rapport/*.aux
+
